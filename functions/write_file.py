@@ -6,7 +6,9 @@ import os
 import shutil
 
 
-def write_file(working_directory: Path, file_path: Path, content: str) -> tuple[str, str | None]:
+def write_file(working_directory: Path, 
+               file_path: Path, 
+               content: str) -> tuple[str, str | None]:
     try:
         
         _file_path = os.path.join(os.getcwd(), working_directory, file_path)

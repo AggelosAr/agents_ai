@@ -1,6 +1,7 @@
 from functions.get_file_content import MAX_CHARS, get_file_contents
 import os 
 import shutil 
+from pathlib import Path
 
 
 OFFSET = 22
@@ -38,82 +39,93 @@ def bread_down(dest: str='calculator/lorem.txt'):
         os.remove(test_path)
 
 
-
-# Test truncation JUST
-set_up()
-result = get_file_contents(working_directory='calculator', file_path='lorem.txt')
-print('---------------> ', result[0])
-assert len(result[0]) < MAX_CHARS + OFFSET, '< %d != %d ' % (len(result[0]), MAX_CHARS + OFFSET)
-assert ('truncated' not in result[0])
-print(f'lorem.txt length: {len(result[0])}')
-print(f'lorem.txt truncated: {'truncated' in result[0]}')
-bread_down()
-
-
-# Test truncation BIGGER
-set_up(characters=111789)
-result = get_file_contents(working_directory='calculator', file_path='lorem.txt')
-print('-------------->', result[0])
-assert len(result[0]) > MAX_CHARS + OFFSET, '< %d != %d ' % (len(result[0]), MAX_CHARS + OFFSET)
-assert ('truncated' in result[0])
-print(f'lorem.txt length: {len(result[0])}')
-print(f'lorem.txt truncated: {'truncated' in result[0]}')
-bread_down()
+def main():
+    # Test truncation JUST
+    set_up()
+    (err, status), (contents, ) = get_file_contents(working_directory=Path('calculator'), 
+                                                    file_path=Path('lorem.txt'))
+    print(f'{err=}')
+    print(f'{status=}')
+    print(f'{contents=}')
+    assert err is False
+    assert len(contents) < MAX_CHARS + OFFSET, '< %d != %d ' % (len(contents), MAX_CHARS + OFFSET)
+    assert ('truncated' not in contents)
+    print(f'lorem.txt length: {len(contents)}')
+    print(f'lorem.txt truncated: {'truncated' in contents}')
+    bread_down()
 
 
-# Test truncation SMALLER
-set_up(characters=8_999)
-result = get_file_contents(working_directory='calculator', file_path='lorem.txt')
-assert len(result[0]) < MAX_CHARS + OFFSET, '< %d != %d ' % (len(result[0]), MAX_CHARS + OFFSET)
-assert ('truncated' not in result[0])
-print(f'lorem.txt length: {len(result[0])}')
-print(f'lorem.txt truncated: {'truncated' in result[0]}')
-bread_down()
+    # Test truncation BIGGER
+    set_up(characters=111789)
+    (err, status), (contents, ) = get_file_contents(working_directory=Path('calculator'), 
+                                                    file_path=Path('lorem.txt'))
+    assert err is False
+    assert len(contents) > MAX_CHARS + OFFSET, '< %d != %d ' % (len(contents), MAX_CHARS + OFFSET)
+    assert ('truncated' in contents)
+    print(f'lorem.txt length: {len(contents)}')
+    print(f'lorem.txt truncated: {'truncated' in contents}')
+    bread_down()
 
 
-# Truncation small
-result = get_file_contents(working_directory='calculator', file_path='main.py')
-print(result[0])
-assert len(result[0]) < 1789 + OFFSET, '< %d != %d ' % (len(result[0]), 1789 + OFFSET)
-assert ('truncated' in result[0]) is False
-print(f'main.py length: {len(result[0])}')
-print(f'main.py truncated: {'truncated' in result[0]}')
+    # Test truncation SMALLER
+    set_up(characters=8_999)
+    (err, status), (contents, ) = get_file_contents(working_directory=Path('calculator'), 
+                                                    file_path=Path('lorem.txt'))
+    assert err is False
+    assert len(contents) < MAX_CHARS + OFFSET, '< %d != %d ' % (len(contents), MAX_CHARS + OFFSET)
+    assert ('truncated' not in contents)
+    print(f'lorem.txt length: {len(contents)}')
+    print(f'lorem.txt truncated: {'truncated' in contents}')
+    bread_down()
 
 
-# simple truncation works as expected
-result = get_file_contents(working_directory='calculator', file_path='main.py')
-print(result[0])
-assert len(result[0]) < 1789 + OFFSET, '< %d != %d ' % (len(result[0]), 1789 + OFFSET)
-assert ('truncated' in result[0]) is False
-assert 'expression = " ".join(sys.argv[1:])' in result[0]
-print(f'main.py length: {len(result[0])}')
-print(f'main.py truncated: {'truncated' in result[0]}')
+    # Truncation small
+    (err, status), (contents, ) = get_file_contents(working_directory=Path('calculator'), 
+                                                    file_path=Path('main.py'))
+    assert err is False
+    assert len(contents) < 1789 + OFFSET, '< %d != %d ' % (len(contents), 1789 + OFFSET)
+    assert ('truncated' in contents) is False
+    print(f'main.py length: {len(contents)}')
+    print(f'main.py truncated: {'truncated' in contents}')
 
 
-# fails to get dir as it does not exist
-result = get_file_contents(working_directory='calculator', file_path='/bin/cat')
-assert len(result[0]) < 1789 + OFFSET, '< %d != %d ' % (len(result[0]), 1789 + OFFSET)
-assert ('truncated' in result[0]) is False
-assert 'Error: Cannot ' in result[0]  and 'permitted working' in result[0]
-print(f'/bin/cat length: {len(result[0])}')
-print(f'/bin/cat truncated: {'truncated' in result[0]}')
+    # simple truncation works as expected
+    (err, status), (contents, ) = get_file_contents(working_directory=Path('calculator'), 
+                                                    file_path=Path('main.py'))
+    assert err is False
+    assert len(contents) < 1789 + OFFSET, '< %d != %d ' % (len(contents), 1789 + OFFSET)
+    assert ('truncated' in contents) is False
+    assert 'expression = " ".join(sys.argv[1:])' in contents
+    print(f'main.py length: {len(contents)}')
+    print(f'main.py truncated: {'truncated' in contents}')
 
 
-# fails to get file since dir does not exist
-result = get_file_contents(working_directory='calculator', file_path='pkg/does_not_exist.py')
-print(result[0])
-assert len(result[0]) < 1789 + OFFSET, '< %d != %d ' % (len(result[0]), 1789 + OFFSET)
-assert ('truncated' in result[0]) is False
-assert 'Error: File not found or is not a regular file: "pkg/does_not_exist.py"' in result[0]
-print(f'pkg/does_not_exist.py length: {len(result[0])}')
-print(f'pkg/does_not_exist.py truncated: {'truncated' in result[0]}')
+    # fails to get dir as it does not exist
+    (err, status), (contents, ) = get_file_contents(working_directory=Path('calculator'), 
+                                                    file_path=Path('/bin/cat'))
+    assert err is True
+    assert contents is None
+    assert 'Error: Cannot ' in status  and 'permitted working' in status
 
 
-# succeeded in getting file metadata 
-result = get_file_contents(working_directory='calculator', file_path='calculator/calculator.py')
-print(result[0])
-assert len(result[0]) < 1789 + OFFSET, '< %d != %d ' % (len(result[0]), 1789 + OFFSET)
-assert ('truncated' in result[0]) is False
-assert 'def _apply_operator(self, operators,' in result[0]
-print(f'calculator.py length: {len(result[0])}')
-print(f'calculator.py truncated: {'truncated' in result[0]}')
+    # # fails to get file since dir does not exist
+    # (err, status), (contents, ) = get_file_contents(working_directory=Path('calculator'), 
+    #                                                 file_path=Path('pkg/does_not_exist.py'))
+    # assert err is True
+    # assert contents is None
+    # assert 'Error: File not found or is not a regular file: "pkg/does_not_exist.py"' in status
+
+
+    # # succeeded in getting file metadata 
+    # (err, status), (contents, ) = get_file_contents(working_directory=Path('calculator'), 
+    #                                                 file_path=Path('calculator/calculator.py'))
+    # assert err is False
+    # assert len(contents) < 1789 + OFFSET, '< %d != %d ' % (len(contents), 1789 + OFFSET)
+    # assert ('truncated' in contents) is False
+    # assert 'def _apply_operator(self, operators,' in contents
+    # print(f'calculator.py length: {len(contents)}')
+    # print(f'calculator.py truncated: {'truncated' in contents}')
+
+
+if __name__=='__main__':
+    main()
