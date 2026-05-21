@@ -1,39 +1,48 @@
-
+import os
 from pathlib import Path
+from typing import Optional
 
 from functions.get_file_content import get_file_contents
-import os 
-import shutil
+from functions.get_files_info import ResultObject, StatusCode
 
 
+# TODO update when/if list of messages is added
 def write_file(working_directory: Path, 
-               file_path: Path, 
-               content: str) -> tuple[str, str | None]:
+               file_path: str, 
+               content: str) -> tuple[ResultObject, Optional[str]]:
+    
     try:
         
         _file_path = os.path.join(os.getcwd(), working_directory, file_path)
         (___file_path, file_ext) = os.path.split(_file_path)
 
         if os.path.exists(___file_path) and not file_ext:
-            return f'Error: Cannot write to "{file_path}" as it is a directory', None
+            return (True, StatusCode.EMPTY, f'Error: Cannot write to "{file_path}" as it is a directory'), None
 
 
-        contents, ((err, status), files_info) = get_file_contents(working_directory=working_directory, 
-                                                                  file_path=file_path)
+        (err, status, msg), old_content = get_file_contents(working_directory=working_directory, 
+                                                            file_path=file_path)
         
         if err:
-            return contents, None
+            if status != StatusCode.FILE_NOT_FOUND:
+                return (err, status, msg), None
         
-        if os.path.exists(_file_path):
-            shutil.rmtree(_file_path)
+        
+        try:
+            os.makedirs(___file_path, exist_ok=True)
+        except OSError:
+            # Ignore this error since the file will be overwritten.
+            # Maybe we want to delete the file before recreating it?
+            ...
 
-        os.makedirs(_file_path, exist_ok=True)
-        
         with open(_file_path, 'w') as f:
-            f.write(contents)
-        
-        return f'Successfully wrote to "{file_path}" ({len(content)} characters written)', contents
+            f.write(content)
+
+        # Here we dont update status for now
+        return (err, status, f'Successfully wrote to "{file_path}" ({len(content)} characters written)'), content
 
     except Exception as e:
-        return f'\tError: {str(e)}', None
+        result_object = ResultObject(status_code=StatusCode.EXCEPTION,
+                                     raw_msg=str(e))
+        return result_object, (None, )
        

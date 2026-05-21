@@ -1,9 +1,9 @@
 import argparse
 import os
-from dotenv import load_dotenv
-
-from openai import OpenAI
 from typing import Any
+
+from dotenv import load_dotenv
+from openai import OpenAI
 
 
 class WOpenAI(OpenAI):
@@ -13,7 +13,7 @@ class WOpenAI(OpenAI):
 
     def __init__(self):
         load_dotenv()
-        api_key = os.environ.get('GEMINI_API_KEY')
+        api_key = os.environ.get('OPENAI_API_KEY')
         super().__init__()
 
 
@@ -45,24 +45,10 @@ def format_response(user_prompt: str,
     return response.output_text
 
 
-def faker():
-    import sys
-    fake = """role="user"user"parts=["""
-    _, args = init()
-    if args.user_prompt:
-        print("""
-    - 'Prompt tokens:'
-    │       - 'Response tokens:'
-        """)
-        sys.exit(0)
-    
-    sys.exit(2)
-
 
 def main():
 
-    #faker()
-
+    
     client, args = init()
 
     # prompt = 'Why is Boot.dev such a great place to learn backend development? Use one paragraph maximum.'
