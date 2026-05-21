@@ -22,8 +22,8 @@ Example: python main.py "3 + 5""" in msg
         msg = run_python_file("calculator", "main.py", ["3 + 5"])
         print(msg)
         assert """STDOUT: {
-"expression": "3 + 5",
-"result": 8
+  "expression": "3 + 5",
+  "result": 8
 }""" in msg
 
 
@@ -40,7 +40,7 @@ Example: python main.py "3 + 5""" in msg
 
         msg = run_python_file("calculator", "../main.py")
         print(msg)
-        assert 'Error' in msg and 'is outside the permitted working directory' in msg
+        assert 'Cannot execute "../main.py" as it is outside' == msg
 
 
     @test_case
@@ -48,7 +48,7 @@ Example: python main.py "3 + 5""" in msg
 
         msg = run_python_file("calculator", "nonexistent.py")
         print(msg)
-        assert 'Error' in msg and 'File not found or is not a regular file' in msg
+        assert '"nonexistent.py" does not exist' == msg
 
 
     @test_case

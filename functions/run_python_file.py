@@ -4,6 +4,7 @@ from pathlib import Path
 
 from functions.consts import PROC_TIMEOUT
 from functions.get_file_content import get_file_contents
+from functions.get_files_info import StatusCode
 
 # TODO FILL StatusCode.EMPTY and maybe use the result object here as well?
 # https://docs.python.org/3/library/subprocess.html#security-considerations or exc?
@@ -25,15 +26,18 @@ def run_python_file(working_directory: str,
                                 file_path=file_path)
         
         (err, status, msg), (file, contents, ) = res
-        
-        # print('err             ----------------> ', err)
-        # print('status          ----------------> ', status)
-        # print('msg             ----------------> ', msg)
-        # print('file            ----------------> ', file)
-        # print('file.abs_path   ----------------> ', file.abs_path)
-        # print('file.parent_dir ----------------> ', file.parent_dir)
+
 
         if err:
+
+            match status:
+
+                case StatusCode.OUTSIDE:
+                    return 'Cannot execute "%s" as it is outside' % (file_path, )
+                
+                case StatusCode.FILE_NOT_FOUND:
+                    return '"%s" does not exist' % (file_path, )
+                
             return msg
         
         # workaround

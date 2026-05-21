@@ -20,7 +20,6 @@ class StatusCode(Enum):
 
     NOT_A_DIR = '\tError: Cannot list "%s" as it is not a dir'
 
-    # is this error / info or good?
     FILE_NOT_FOUND = '\tError: File not found or is not a regular file: "%s"'
 
     # !? security considerations 
@@ -39,7 +38,8 @@ class StatusCode(Enum):
             StatusCode.EXCEPTION,
             StatusCode.EMPTY,
             StatusCode.DIR_DOES_NOT_EXIST,
-            StatusCode.FILE_NOT_FOUND
+            StatusCode.FILE_NOT_FOUND,
+            StatusCode.EXCEPTION
         ])
     
     @classmethod
@@ -49,7 +49,6 @@ class StatusCode(Enum):
             StatusCode.SUCCESS_DIR_IS,
             StatusCode.SUCCESS_FILE_FOUND,
             StatusCode.NOT_A_DIR,
-            # StatusCode.FILE_NOT_FOUND ?
         ])
     
     @classmethod
@@ -292,8 +291,6 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
                                            raw_msg=DOT)
         else:
             # try to connect working_directory to dest_directory
-            print(f'{working_directory=}')
-            print(f'{dest_directory=}')
             connected_directory = connect_d_to_d(p_dir=working_directory)
 
             if not connected_directory:

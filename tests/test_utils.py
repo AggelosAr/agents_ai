@@ -49,7 +49,8 @@ def break_down(dest: str='calculator/lorem.txt') -> None:
 TOTAL_TESTS = 0
 TEST_FAILS = 0
 # TODO add utility to add test counter
-
+# TODO also sort tests (e.g. at the bottom the failures)
+# TODO also remove the test calls inside the main
 
 
 def test_case(name,  func: Callable[[Any, ], Any]) -> Callable[[Any, ], Any]:
@@ -61,9 +62,12 @@ def test_case(name,  func: Callable[[Any, ], Any]) -> Callable[[Any, ], Any]:
     BLUE = "\033[94m"
     CYAN = "\033[96m"
     
+    # if func.__name__ not in {'s'}:
+    #     return lambda : ...
+    
     def wrapper(*args, **kwargs) -> Any:
 
-        print('Running test: <%s>.<%s>\n\n' % (os.path.split(name), func.__name__, ))
+        print('Running test: <%s>.<%s>\n\n' % (os.path.split(name)[-1], func.__name__, ))
 
         results = None
 
