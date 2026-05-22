@@ -17,6 +17,7 @@ def show_response(*,  response: ResponseObject, verbosity: bool) -> None:
             if item.type == 'function_call':
                 
                 print('\n\n\t[*] Response: \n\n\t\t\t%s', (item, ))
+                
                 print()
             else:
                 print('\n\n\t[*] Response: Functin Call:\n\n\t\t\t%s', (item, ))
@@ -26,9 +27,14 @@ def show_response(*,  response: ResponseObject, verbosity: bool) -> None:
 def show_usage(*,  response: ResponseObject, verbosity: bool) -> None:
 
     if verbosity:
+        print()
+        print()
+        print()
         print('\t\t-------------------------------')
         print('\t\t| -> Prompt tokens: %s' % (response.usage.input_tokens, ))
         print('\t\t| -> Response tokens: %s' % (response.usage.output_tokens, ))
         print('\t\t-------------------------------')
+        print()
+        print()
         print()
 

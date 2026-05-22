@@ -1,6 +1,6 @@
 import argparse
 
-from model_specifics.functions import gather_function_calls
+from model_specifics.functions import gather_tool_calls
 from model_specifics.logs import show_response, show_usage, show_user_message
 from model_specifics.open_ai.client import _OpenAI
 from model_specifics.open_ai.prompts import \
@@ -54,23 +54,27 @@ def main():
         )
 
         # 2. Print the user query and the response in a user friendly manner
-        #    Also show the repsonse object
-        #    And finally show the usage info
         _ = show_user_message(user_prompt=messages[-1], verbosity=verbosity)
-        _ = show_response(response=response, verbosity=verbosity)
-        _ = show_usage(response=response, verbosity=verbosity)
 
         # 3. Update messages with the response output
         messages.extend(response.output)
 
         # 4. Find function calls and collect them if any
-        func_calls = gather_function_calls(response_item=response,
-                                           verbosity=verbosity)
+        tool_calls = gather_tool_calls(response_item=response,
+                                       verbosity=verbosity)
 
-        # 5. Call functions if you found any
+        # 5. Show the tool calls.
+        # _ = show_response(response=response, verbosity=verbosity) ?
+        for tool_call in tool_calls:
+            print(tool_call)
+
+        # 6. Show usage
+        _ = show_usage(response=response, verbosity=verbosity)
+        
+        # 7. Call functions if you found any
         ...
 
-        # 6. Update the messages with the results of the functions calls
+        # 8. Update the messages with the results of the functions calls
         ...
         
 

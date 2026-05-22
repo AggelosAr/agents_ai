@@ -1,9 +1,9 @@
 from enum import Enum
-from typing import Mapping, NamedTuple
+from typing import NamedTuple
 
 
 class ResponseType(Enum):
-    FUNCTION_CALL = 1
+    TOOL_FUNCTION_CALL = 1
 
 
 class ResponseObject(NamedTuple):
