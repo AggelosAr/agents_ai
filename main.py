@@ -5,7 +5,7 @@ from typing import Callable, Mapping
 
 from functions.get_file_contents import _get_file_contents
 from functions.write_file import _write_file
-from functions.run_python_file import _run_python_file
+from functions.run_python_file import __run_python_file
 from functions.get_files_info import _get_files_info
 
 from model_specifics.consts import AI_CWD
@@ -20,7 +20,7 @@ from model_specifics.open_ai.tools import TOOLS as OPEN_AI_TOOLS
 FUNCTIONS: Mapping[str, Callable] = {
     'get_file_content': partial(_get_file_contents, os.path.join(os.getcwd(), AI_CWD)),
     'write_file': partial(_write_file, os.path.join(os.getcwd(), AI_CWD)),
-    'run_python_file': partial(_run_python_file, os.path.join(os.getcwd(), AI_CWD)),
+    'run_python_file': partial(__run_python_file, os.path.join(os.getcwd(), AI_CWD)),
     'get_files_info': partial(_get_files_info, os.path.join(os.getcwd(), AI_CWD))
 }
 
@@ -116,10 +116,8 @@ def main():
         print(str(called_function_result))
 
 
-
         # messages.extend(resp)
         # messages.extend(func_calls)
-
         print('\n\n\t\t-----------------------------------------------------------------')
 
 

@@ -1,3 +1,4 @@
+from functools import partial
 import os
 import subprocess
 from pathlib import Path
@@ -11,8 +12,10 @@ from functions.get_files_info import StatusCode
 # TODO assert args
 
 
-# def run_python_file(file_name: str = '', args: list[str] | None = None) -> Callable:
-#     return partial(_run_python_file, Path(CWD))(file_name, args)
+def __run_python_file(working_directory: str, file_name: str = '', args: list[str] | None = None) -> str:
+    return _run_python_file(working_directory=working_directory, 
+                            file_path=file_name,
+                            args=args)
 
 
 def _run_python_file(working_directory: str, 
