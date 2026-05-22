@@ -1,12 +1,8 @@
 import json
-from typing import Callable, List, Mapping, NamedTuple, TypeAlias, TypeVar
+from typing import Mapping, NamedTuple
 
-from model_specifics.responses import ResponseType
-
-RESPONSE = TypeVar('RESPONSE')
-RESPONSE_TEXT = TypeVar('RESPONSE_TEXT')
-
-FUNC_INVOCATION_RESULT: TypeAlias = dict
+from model_specifics.open_ai.response_objects import (ResponseObject,
+                                                      ResponseType)
 
 
 class Function(NamedTuple):
@@ -17,7 +13,6 @@ class Function(NamedTuple):
     p_kwargs: Mapping[str, Mapping[str, str]]
 
 
-# TODO split this to e.g. tool call and create
 class FunctionToolCall:
 
     def __init__(self, 
@@ -42,8 +37,8 @@ class FunctionToolCall:
                 % (self.name, self.args, self.resp_type, self._id, self.call_id, ))
 
 
-def gather_tool_calls(response: RESPONSE, 
-                      verbosity: bool) -> List[FunctionToolCall]:
+def gather_tool_calls(response: ResponseObject, 
+                      verbosity: bool) -> list[FunctionToolCall]:
     
     func_calls = []
 
@@ -72,18 +67,4 @@ def gather_tool_calls(response: RESPONSE,
             print()
 
     return func_calls
-
-
-def run_functions(funcs: list[Callable], *args, **kwargs) -> FUNC_INVOCATION_RESULT:
-
-    # file_path = json.loads(item.arguments)['file_path']
-    # (err, status, msg), files_info = get_files_info(file_path=file_path)
-    # return {
-    #     'type': 'function_call_output',
-    #     'call_id': item.call_id,
-    #     'output': files_info,
-    # }
-    ...
-
-
 

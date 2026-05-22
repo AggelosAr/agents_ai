@@ -7,7 +7,8 @@ from functions.get_files_info import DirInfo, PathItem, StatusCode
 class TestGetFilesInfo(unittest.TestCase):
 
     def setUp(self):
-        self.addTypeEqualityFunc(typeobj=PathItem, function=PathItem.__eq__)
+        self.addTypeEqualityFunc(typeobj=PathItem, 
+                                 function=lambda x, y, msg: x == y)
 
     def test_success_current_dir(self):
         dir_info = DirInfo(working_directory="calculator", dest_directory=".")
@@ -153,7 +154,7 @@ class TestGetFilesInfo(unittest.TestCase):
                          (msg))
 
     # TODO maybe we want to apply formatting to the resulting string?
-    def test_success_nest_nest_same_name(self):
+    def test_success_nest_same_name(self):
 
         dir_info = DirInfo(working_directory="calculator", dest_directory="/calculator")
         (is_err, status_code, msg), _ = dir_info

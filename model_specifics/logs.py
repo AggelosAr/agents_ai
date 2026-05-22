@@ -1,4 +1,4 @@
-from model_specifics.responses import ResponseObject
+from model_specifics.open_ai.response_objects import ResponseObject
 
 
 def show_user_message(*, user_prompt: dict, verbosity: bool) -> None:
@@ -20,10 +20,9 @@ def show_response(*, response: ResponseObject, verbosity: bool) -> None:
                 print()
                 
             if item.type == 'message':
-
+                
                 print('\n\n\t[*] Response: Function Call:\n\n\t\t\t%s', (item, ))
                 print(item)
-
                 print()
 
 

@@ -1,15 +1,9 @@
-from functools import partial
 import os
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 
-from functions.consts import CWD
 from functions.get_file_contents import _get_file_contents
 from functions.get_files_info import ResultObject, StatusCode
-
-
-# def write_file(file_path: str = '', content: str = '') -> Callable:
-#     return partial(_write_file, Path(CWD))(file_path, content)
 
 
 # TODO update when/if list of messages is added
@@ -23,15 +17,19 @@ def _write_file(working_directory: Path,
         (___file_path, file_ext) = os.path.split(_file_path)
 
         if os.path.exists(___file_path) and not file_ext:
-            return (True, StatusCode.EMPTY, f'Error: Cannot write to "{file_path}" as it is a directory'), None
+            res_object = ResultObject()
+            res_object.update_status(new_status_code=res_object.status_code,
+                                     new_msg=f'Error: Cannot write to "{file_path}" as it is a directory')
+            return res_object, None
 
 
-        (err, status, msg), old_content = _get_file_contents(working_directory=working_directory, 
+        res_object, (file, contents, ) = _get_file_contents(working_directory=working_directory, 
                                                             file_path=file_path)
+        (err, status, msg) = res_object
         
         if err:
             if status != StatusCode.FILE_NOT_FOUND:
-                return (err, status, msg), None
+                return res_object, None
         
         
         try:
@@ -49,5 +47,5 @@ def _write_file(working_directory: Path,
 
     except Exception as e:
         result_object = ResultObject(status_code=StatusCode.EXCEPTION,
-                                     raw_msg=str(e))
-        return result_object, (None, )
+                                     raw_msg=e)
+        return result_object, None

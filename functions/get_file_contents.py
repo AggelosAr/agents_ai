@@ -1,15 +1,10 @@
-from functools import partial
 import os
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Optional
 
-from functions.consts import CWD, MAX_CHARS
+from functions.consts import MAX_CHARS
 from functions.get_files_info import (DirInfo, PathItem, ResultObject,
                                       StatusCode)
-
-
-# def get_file_content(file_path: str = '') -> Callable:
-#     return partial(_get_file_contents, Path(CWD))(file_path)
 
 
 def _get_file_contents(working_directory: Path, 
@@ -28,10 +23,9 @@ def _get_file_contents(working_directory: Path,
         (err, status, msg), files_info = dir_info
 
         if err:
-            # kinda bad but we will update the path of the result object
-            # for visual purposes
-            dir_info.result_obj.update_status(new_status_code=dir_info.result_obj.status_code,
+            dir_info.result_obj.update_status(new_status_code=status,
                                               new_msg=file_path)
+            
             return dir_info.result_obj, (None, None, )
         
         file_found = dir_info.file_in_files(file_name=tail if '.' in tail else '')

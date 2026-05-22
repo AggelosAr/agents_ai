@@ -1,28 +1,13 @@
 import argparse
-from functools import partial
-import os
-from typing import Callable, Mapping
 
-from functions.get_file_contents import _get_file_contents
-from functions.write_file import _write_file
-from functions.run_python_file import __run_python_file
-from functions.get_files_info import _get_files_info
-
-from model_specifics.consts import AI_CWD, MAX_ITERATIONS
+from model_specifics.consts import MAX_ITERATIONS
 from model_specifics.functions import gather_tool_calls
+from model_specifics.functions_available import FUNCTIONS
 from model_specifics.logs import show_usage, show_user_message
 from model_specifics.open_ai.client import _OpenAI
 from model_specifics.open_ai.prompts import \
     SYSTEM_PROMPT as OPEN_AI_SYSTEM_PROMPT
 from model_specifics.open_ai.tools import TOOLS as OPEN_AI_TOOLS
-
-
-FUNCTIONS: Mapping[str, Callable] = {
-    'get_file_content': partial(_get_file_contents, os.path.join(os.getcwd(), AI_CWD)),
-    'write_file': partial(_write_file, os.path.join(os.getcwd(), AI_CWD)),
-    'run_python_file': partial(__run_python_file, os.path.join(os.getcwd(), AI_CWD)),
-    'get_files_info': partial(_get_files_info, os.path.join(os.getcwd(), AI_CWD))
-}
 
 
 def init() -> tuple[_OpenAI, argparse.Namespace]:
@@ -114,12 +99,9 @@ def main():
             print('\n\n\t[*] ADDED FUNCTION CALL RESULT AT MESSAGES')
             print(str(called_function_result))
 
-        #?
-        _ = show_usage(response=response, verbosity=verbosity)
-        # messages.extend(resp)
-        # messages.extend(func_calls)
-        print('\n\n\t\t-----------------------------------------------------------------')
 
+        _ = show_usage(response=response, verbosity=verbosity)
+        print('\n\n\t\t-----------------------------------------------------------------')
 
 
 if __name__=='__main__':

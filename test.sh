@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#!? python3
-
 source .venv/bin/activate
 
 python3 -m test_get_files_info

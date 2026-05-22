@@ -1,11 +1,11 @@
 import os
 from collections.abc import Iterator
 from enum import Enum
-from functools import cached_property, partial
+from functools import cached_property
 from pathlib import Path
-from typing import Callable, Optional, Self
+from typing import Optional, Self
 
-from functions.consts import CWD, DOT
+from functions.consts import DOT
 
 # TODO **3** consider updating to have list of messages on levels (or res objects) / updating status
 # TODO FIX string literals / anots
@@ -55,43 +55,6 @@ class StatusCode(Enum):
     def is_error(cls, status_code: 'StatusCode') -> bool:
         return status_code in cls.abort_status_codes()
 
-    @classmethod
-    def formatted_msg(cls, status_code: 'StatusCode', raw_msg: str) -> str:
-        
-        match status_code:
-            
-            case StatusCode.DIR_DOES_NOT_EXIST:
-                return StatusCode.DIR_DOES_NOT_EXIST.value % (raw_msg, )
-            
-            case StatusCode.SUCCESS_DIR_WITHIN:
-                return StatusCode.SUCCESS_DIR_WITHIN.value % (raw_msg, )
-            
-            case StatusCode.SUCCESS_DIR_IS:
-                return StatusCode.SUCCESS_DIR_IS.value % (raw_msg, )
-            
-            case StatusCode.SUCCESS_FILE_FOUND:
-                return StatusCode.SUCCESS_FILE_FOUND.value % (raw_msg, )
-                
-            case StatusCode.OUTSIDE:
-                return StatusCode.OUTSIDE.value % (raw_msg, )
-                
-            case StatusCode.NOT_A_DIR:
-                return StatusCode.NOT_A_DIR.value % (raw_msg, )
-                
-            case StatusCode.FILE_NOT_FOUND:
-                return StatusCode.FILE_NOT_FOUND.value % (raw_msg, )
-            
-            case StatusCode.EXCEPTION:
-                return StatusCode.EXCEPTION.value % (raw_msg, )
-            
-            case StatusCode.EMPTY:
-                #?
-                return StatusCode.EMPTY.value % (raw_msg, )
-
-            case _:
-                raise Exception('Not a valid status code.<%s>' 
-                                % (status_code, ))
-
 
 class PathItem:
 
@@ -111,8 +74,8 @@ class PathItem:
             return 'name %s: file_size=%d, is_dir=%s' % (self.abs_path, self.size, self.dir_repr)
         return 'name %s: file_size=%d, is_dir=%s' % (self.file_name, self.size, self.dir_repr)
     
-    # TODO fix msg
-    def __eq__(self, other: object, /, msg) -> bool:
+    
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, PathItem):
             return NotImplemented
         
@@ -120,7 +83,7 @@ class PathItem:
             self.abs_path == other.abs_path,
             self.size == other.size,
             self.is_dir == other.is_dir])
-
+    
     @cached_property
     def _full_file_name_parts(self) -> tuple[str, str]:
         return os.path.split(self.abs_path)
@@ -154,50 +117,46 @@ class PathItem:
 # TODO maybe ResultObject should inherit from levels and yield lists?
 class ResultObject(tuple[bool, StatusCode, str]):
     
-    def __init__(self, 
-                 status_code: StatusCode, 
-                 raw_msg: str | Exception) -> None:
-        
+    def __init__(self,
+                 raw_msg: Optional[str | Exception] = None,
+                 status_code: Optional[StatusCode] = None, 
+                 ) -> None:
+
+        if not raw_msg:
+            raw_msg = ''
+        if not status_code:
+            status_code = StatusCode.EMPTY
+
         if isinstance(raw_msg, Path):
             1/0
 
         self.is_error = status_code in StatusCode.abort_status_codes()
         self.status_code = status_code
-
-        if isinstance(raw_msg, str):
-            self.raw_msg = StatusCode.formatted_msg(status_code=status_code, 
-                                                    raw_msg=raw_msg)
-        if isinstance(raw_msg, Exception):
-            self.raw_msg = StatusCode.formatted_msg(status_code=status_code, 
-                                                    raw_msg=raw_msg)
+        self.msg = status_code.value % (raw_msg, )
         
-    def __iter__(self) -> Iterator[bool | StatusCode | str, None]:
+    def __iter__(self) -> Iterator[bool | StatusCode | str]:
         yield self.is_error
         yield self.status_code
-        yield self.raw_msg
+        yield self.msg
 
-    def update_status(self, new_status_code: 
-                      StatusCode, new_msg: str | Exception) -> None:
+    def __repr__(self) -> str:
+        return ('ResultObject\n\t\t< IS ERROR: %s >\n\t\t<STATUS CODE: %s>\n\t\t< MESSAGE: %s>' 
+                % (self.is_error, self.status_code, self.msg))
+    
+    def __str__(self) -> str:
+        return self.__repr__()
+
+    def update_status(self, 
+                      new_status_code: StatusCode, 
+                      new_msg: str | Exception) -> None:
         
         if isinstance(new_msg, Path):
             1/0
 
         self.status_code = new_status_code
         self.is_error = new_status_code in StatusCode.abort_status_codes()
-        self.raw_msg = StatusCode.formatted_msg(status_code=new_status_code, 
-                                                raw_msg=new_msg)
-    
-    # @cached_property
-    # def f_msg(self):
-    #     return StatusCode.formatted_msg(status_code=self.status_code, 
-    #                                     raw_msg=self.raw_msg)
-    
-    # def __repr__(self) -> str:
-    #     return ('ResultObject\n\t\t< IS ERROR: %s >\n\t\t<STATUS CODE: %s>\n\t\t< MESSAGE: %s>' 
-    #             % (self.is_error, self.status_code, self.f_msg))
-    
-    # def __str__(self) -> str:
-    #     return self.__repr__()
+        self.msg = new_status_code.value % (new_msg, )
+        
 
 # TODO is this the correct way to do the iter ?
 class DirInfo(tuple[ResultObject, list[PathItem]]):
@@ -238,13 +197,13 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
         self.working_directory = working_directory
         self.dest_directory = dest_directory
         
-        self.result_obj = None
+        self.result_obj = ResultObject()
         self.items: list[PathItem] = []
 
         self._get_files_info()
-        assert self.result_obj != None
+        assert self.result_obj.status_code != StatusCode.EMPTY
     
-    def __iter__(self) -> Iterator[ResultObject | list[PathItem], None]:
+    def __iter__(self) -> Iterator[ResultObject | list[PathItem]]:
         yield self.result_obj
         yield sorted(self.items, key=lambda l: l.size)
     
@@ -260,29 +219,27 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
         """
         Initializer helper method
         """
-        working_directory = self.working_directory
-        dest_directory = self.dest_directory
 
-        abs_working_dir = os.path.abspath(working_directory)
-        target_dir = os.path.normpath(os.path.join(abs_working_dir, dest_directory))
+        abs_working_dir = os.path.abspath(self.working_directory)
+        target_dir = os.path.normpath(os.path.join(abs_working_dir, self.dest_directory))
 
         if os.path.commonpath([abs_working_dir, target_dir]) != abs_working_dir:
             self.result_obj=ResultObject(status_code=StatusCode.OUTSIDE,
-                                         raw_msg=dest_directory)
+                                         raw_msg=self.dest_directory)
             return
 
-        working_parts = os.path.split(os.path.join(os.getcwd(), working_directory))
+        working_parts = os.path.split(os.path.join(os.getcwd(), self.working_directory))
         master_prefix, master_suffix = working_parts
 
-        dest_parts = os.path.split(dest_directory)
+        dest_parts = os.path.split(self.dest_directory)
         dest_prefix, dest_suffix = dest_parts
         
 
         def connect_d_to_d(p_dir: Path) -> Optional[Path]:
             
-            parts = str(p_dir).partition(dest_directory)
+            parts = str(p_dir).partition(self.dest_directory)
             found_dir = sum(map(lambda x: x is str(), parts)) == 1
-            found_dir |= os.path.normpath(dest_directory) == dest_prefix
+            found_dir |= os.path.normpath(self.dest_directory) == dest_prefix
 
             if found_dir:
                 return Path(os.path.join(master_prefix, p_dir))
@@ -295,22 +252,22 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
                     res = connect_d_to_d(p_dir=full_path)
                     if res:
                         return res
-
-        if dest_directory == DOT:
-            connected_directory = working_directory
+        
+        if self.dest_directory == DOT:
+            connected_directory = self.working_directory
             self.result_obj = ResultObject(status_code=StatusCode.SUCCESS_DIR_IS,
                                            raw_msg=DOT)
         else:
             # try to connect working_directory to dest_directory
-            connected_directory = connect_d_to_d(p_dir=working_directory)
+            connected_directory = connect_d_to_d(p_dir=self.working_directory)
 
             if not connected_directory:
                 self.result_obj = ResultObject(status_code=StatusCode.NOT_A_DIR,
-                                               raw_msg=dest_directory)
+                                               raw_msg=self.dest_directory)
                 return 
 
             self.result_obj = ResultObject(status_code=StatusCode.SUCCESS_DIR_WITHIN,
-                                           raw_msg=dest_directory)
+                                           raw_msg=self.dest_directory)
 
         # TODO update
         # for root, dirs, files in os.walk(new_directory):
@@ -348,8 +305,7 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
 
 
 def _get_files_info(working_directory: Path, 
-                    directory: str) -> tuple[ResultObject, 
-                                             tuple[Optional[PathItem], Optional[str]]]:
+                    directory: str) -> tuple[ResultObject, list[PathItem]]:
     
     head, tail = os.path.split(directory)
 
@@ -359,7 +315,3 @@ def _get_files_info(working_directory: Path,
     (err, status, msg), files_info = dir_info
 
     return (err, status, msg), files_info
-
-
-# def get_files_info(directory: str='') -> Callable:
-#     return partial(_get_files_info, Path(CWD))(directory)

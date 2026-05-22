@@ -1,6 +1,6 @@
-from functools import partial
 import os
 import subprocess
+from functools import partial
 from pathlib import Path
 
 from functions.consts import PROC_TIMEOUT
@@ -12,13 +12,15 @@ from functions.get_files_info import StatusCode
 # TODO assert args
 
 
-def __run_python_file(working_directory: str, file_name: str = '', args: list[str] | None = None) -> str:
+def __run_python_file(working_directory: Path, 
+                      file_name: str = '',
+                      args: list[str] | None = None) -> str:
     return _run_python_file(working_directory=working_directory, 
                             file_path=file_name,
                             args=args)
 
 
-def _run_python_file(working_directory: str, 
+def _run_python_file(working_directory: Path, 
                      file_path: str, 
                      args: list[str] | None = None) -> str:
     
