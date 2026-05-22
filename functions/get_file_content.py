@@ -1,38 +1,39 @@
+import os
 from pathlib import Path
 from typing import Optional
 
-from functions.get_files_info import DirInfo
-import os
+from functions.consts import MAX_CHARS
+from functions.get_files_info import (DirInfo, PathItem, ResultObject,
+                                      StatusCode)
 
 
-MAX_CHARS = 10_000
-
-
-# -> tuple[str, Optional[tuple[bool, str]], Optional[list[Item]]]:
-def get_file_contents(working_directory: Path, file_path: Path) -> tuple[str, Optional[DirInfo]]:
-
+def get_file_contents(working_directory: Path, 
+                      file_path: str) -> tuple[ResultObject, 
+                                               tuple[Optional[PathItem], Optional[str]]]:
     try:
 
-        dir_info = DirInfo(result_code='')
+        head, tail = os.path.split(file_path)
 
-        dest_root = os.path.split(file_path)
-        dest_root, target_name = dest_root
+        # TODO refactor maybe !!!!
+        # Force get_files_info to search in the parent dir 
+        # since how further logic is implemented 
+        dir_info = DirInfo(working_directory=working_directory, 
+                           dest_directory=head if '.' in tail else file_path)
 
-        if not dest_root:
-            dest_root = '.'
+        (err, status, msg), files_info = dir_info
 
-        (err, status), files_info = dir_info.get_files_info(working_directory=working_directory, 
-                                                            dest_directory=dest_root)
-
-        # TODO maybe use the error and propagate it further back ?
         if err:
-            return f'\tError: Cannot read "{file_path}" as it is outside the permitted working directory', None, None, None
+            # kinda bad but we will update the the path of the result object 
+            # for visual purposes
+            dir_info.result_obj.update_status(new_status_code=dir_info.result_obj.status_code,
+                                              new_msg=file_path)
+            return dir_info.result_obj, (None, None, )
         
+        # yeah vs code fails? to infer file_in_files as NEVER?
+        file_found = dir_info.file_in_files(file_name=tail if '.' in tail else '')
         
-        file_found = dir_info.file_in_files(target=target_name)
-
         if not file_found:
-            return f'\tError: File not found or is not a regular file: "{file_path}"', None, None, None
+            return dir_info.result_obj, (None, None, )
 
 
         with open(file_found.abs_path, 'r') as f:
@@ -41,8 +42,10 @@ def get_file_contents(working_directory: Path, file_path: Path) -> tuple[str, Op
             if f.read(1):
                 contents += f'[...File "{file_path}" truncated at {MAX_CHARS} characters]'
 
-            return contents, (err, status), files_info
-        
+            return dir_info.result_obj, (file_found, contents, )
+                
     except Exception as e:
-        return f'\tError: {str(e)}', None, None, None
+        result_object = ResultObject(status_code=StatusCode.EXCEPTION,
+                                     raw_msg=str(e))
+        return result_object, (None, None, )
        

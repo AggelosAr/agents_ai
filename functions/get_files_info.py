@@ -1,23 +1,119 @@
 import os
+from collections.abc import Iterator
+from enum import Enum
+from functools import cached_property, partial
 from pathlib import Path
-from typing import Generator
+from typing import Optional, Self
+
+from functions.consts import CWD, DOT
+
+# TODO **3** consider updating to have list of messages on levels (or res objects) / updating status
+# TODO FIX string literals / anots
+# TODO current implementation propably fails on dotted file names.
+# TODO UPDATE PathItem with relative path as well
+
+class StatusCode(Enum):
+
+    SUCCESS_DIR_WITHIN = '\tSuccess: "%s" is within the working directory'
+    SUCCESS_DIR_IS = '\tSuccess: "%s" is the working directory'
+    SUCCESS_FILE_FOUND = '\tSuccess: file "%s" found'
+
+    NOT_A_DIR = '\tError: Cannot list "%s" as it is not a dir'
+
+    FILE_NOT_FOUND = '\tError: File not found or is not a regular file: "%s"'
+
+    # !? security considerations 
+    DIR_DOES_NOT_EXIST = '\tError: Failed to find dir "%s" as it does not exist' 
+
+    OUTSIDE = '\tError: Cannot list "%s" as it is outside the permitted working directory'
+
+    EXCEPTION = '\tError: Exception: <"%s">' # not tested
+
+    EMPTY = '\tEmpty <"%s">' #?
+
+    @classmethod
+    def abort_status_codes(cls) -> set['StatusCode']:
+        return set([
+            StatusCode.OUTSIDE,
+            StatusCode.EXCEPTION,
+            StatusCode.EMPTY,
+            StatusCode.DIR_DOES_NOT_EXIST,
+            StatusCode.FILE_NOT_FOUND,
+            StatusCode.EXCEPTION
+        ])
+    
+    @classmethod
+    def permit_write_status_codes(cls) -> set['StatusCode']:
+        return set([
+            StatusCode.SUCCESS_DIR_WITHIN,
+            StatusCode.SUCCESS_DIR_IS,
+            StatusCode.SUCCESS_FILE_FOUND,
+            StatusCode.NOT_A_DIR,
+        ])
+    
+    @classmethod
+    def is_error(cls, status_code: 'StatusCode') -> bool:
+        return status_code in cls.abort_status_codes()
+
+    @classmethod
+    def formatted_msg(cls, status_code: 'StatusCode', raw_msg: str) -> str:
+        
+        match status_code:
+            
+            case StatusCode.DIR_DOES_NOT_EXIST:
+                return StatusCode.DIR_DOES_NOT_EXIST.value % (raw_msg, )
+            
+            case StatusCode.SUCCESS_DIR_WITHIN:
+                return StatusCode.SUCCESS_DIR_WITHIN.value % (raw_msg, )
+            
+            case StatusCode.SUCCESS_DIR_IS:
+                return StatusCode.SUCCESS_DIR_IS.value % (raw_msg, )
+            
+            case StatusCode.SUCCESS_FILE_FOUND:
+                return StatusCode.SUCCESS_FILE_FOUND.value % (raw_msg, )
+                
+            case StatusCode.OUTSIDE:
+                return StatusCode.OUTSIDE.value % (raw_msg, )
+                
+            case StatusCode.NOT_A_DIR:
+                return StatusCode.NOT_A_DIR.value % (raw_msg, )
+                
+            case StatusCode.FILE_NOT_FOUND:
+                return StatusCode.FILE_NOT_FOUND.value % (raw_msg, )
+            
+            case StatusCode.EXCEPTION:
+                return StatusCode.EXCEPTION.value % (raw_msg, )
+            
+            case StatusCode.EMPTY:
+                #?
+                return StatusCode.EMPTY.value % (raw_msg, )
+
+            case _:
+                raise Exception('Not a valid status code.<%s>' 
+                                % (status_code, ))
 
 
-class Item:
+class PathItem:
 
-    def __init__(self, abs_path: Path, size: int, is_dir: bool):
+    def __init__(self, 
+                 abs_path: Path,
+                 size: int, 
+                 is_dir: bool):
         self.abs_path = abs_path
         self.size = size
         self.is_dir = is_dir
     
-    def __repr__(self):
-        return 'Item [%s]<%s>' % (self.abs_path, self.__str__())
+    def __repr__(self) -> str:
+        return 'Item <%s>' % (self.__str__(), )
     
-    def __str__(self):
-        return 'name %s: file_size=%d, is_dir=%s' % (self.name, self.size, self.dir_repr)
+    def __str__(self) -> str:
+        if self.is_dir:
+            return 'name %s: file_size=%d, is_dir=%s' % (self.abs_path, self.size, self.dir_repr)
+        return 'name %s: file_size=%d, is_dir=%s' % (self.file_name, self.size, self.dir_repr)
     
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Item):
+    # TODO fix msg
+    def __eq__(self, other: object, /, msg) -> bool:
+        if not isinstance(other, PathItem):
             return NotImplemented
         
         return all([
@@ -25,113 +121,234 @@ class Item:
             self.size == other.size,
             self.is_dir == other.is_dir])
 
-    @property
-    def name(self) -> Path:
-        return os.path.split(self.abs_path)[-1]
+    @cached_property
+    def _full_file_name_parts(self) -> tuple[str, str]:
+        return os.path.split(self.abs_path)
     
+    @cached_property
+    def parent_dir(self) -> str:
+        return self._full_file_name_parts[0]
+    
+    @cached_property
+    def file_name(self) -> str:
+        return self._full_file_name_parts[1]
+    
+    @cached_property
+    def _file_name_parts(self) -> tuple[str, str]:
+        assert DOT in self.file_name
+        return self.file_name.split(DOT)
+    
+    @cached_property
+    def stem(self) -> str:
+        return self._file_name_parts[0]
+    
+    @cached_property
+    def ext(self) -> str:
+        return self._file_name_parts[1]
+
     @property
     def dir_repr(self) -> str:
         return 'True' if self.is_dir is True else 'False'
-
-
-class ResultObject(tuple[bool, str]):
     
-    def __init__(self, is_error: bool, status: str):
-        self.is_error = is_error
-        self.status = status
 
-    def __iter__(self) -> Generator[bool | str, None]:
+# TODO maybe ResultObject should inherit from levels and yield lists?
+class ResultObject(tuple[bool, StatusCode, str]):
+    
+    def __init__(self, 
+                 status_code: StatusCode, 
+                 raw_msg: str | Exception) -> None:
+        
+        if isinstance(raw_msg, Path):
+            1/0
+
+        self.is_error = status_code in StatusCode.abort_status_codes()
+        self.status_code = status_code
+
+        if isinstance(raw_msg, str):
+            self.raw_msg = StatusCode.formatted_msg(status_code=status_code, 
+                                                    raw_msg=raw_msg)
+        if isinstance(raw_msg, Exception):
+            self.raw_msg = StatusCode.formatted_msg(status_code=status_code, 
+                                                    raw_msg=raw_msg)
+        
+    def __iter__(self) -> Iterator[bool | StatusCode | str, None]:
         yield self.is_error
-        yield self.status
+        yield self.status_code
+        yield self.raw_msg
+
+    def update_status(self, new_status_code: 
+                      StatusCode, new_msg: str | Exception) -> None:
+        
+        if isinstance(new_msg, Path):
+            1/0
+
+        self.status_code = new_status_code
+        self.is_error = new_status_code in StatusCode.abort_status_codes()
+        self.raw_msg = StatusCode.formatted_msg(status_code=new_status_code, 
+                                                raw_msg=new_msg)
 
 
-class DirInfo(tuple[ResultObject, list[Item]]):
+# TODO is this the correct way to do the iter ?
+class DirInfo(tuple[ResultObject, list[PathItem]]):
+    """
+    In order to initialize this class
+    # If you pass the dest_directory as empty string the 
+    # current working directory will be used instead
+    1. Either pass the working directory along with the nested directory
+       to get the directory info
+    2. To get the file metadata, use the flag search_for_file
+       and then use the file_in_files function. 
+    """
+    # TODO this seems bad ... workaround for now
+    def __new__(cls, *args, **kwargs) -> Self:
+        obj = super().__new__(cls)
+
+        if 'result_obj' in kwargs:
+            obj.result_obj = kwargs['result_obj']
+            assert 'items' in kwargs
+            obj.items = []
+            return 
+        
+        return super().__new__(cls)
     
-    get_path = lambda p: os.path.abspath(os.path.normpath(p))
+    def __init__(self, 
+                 working_directory: Path, 
+                 dest_directory: str) -> None:
+        
+        if isinstance(dest_directory, Path):
+            1/0
+            
+        assert DOT not in str(working_directory)
+        
+        if not dest_directory:
+            dest_directory = DOT
 
-    def __init__(self, result_code: str, items: list[Item]=[]):
-        self.result_code = result_code
-        self.items = items
+        # Safe keep those, since we may need them later
+        self.working_directory = working_directory
+        self.dest_directory = dest_directory
+        
+        self.result_obj = None
+        self.items: list[PathItem] = []
+
+        self._get_files_info()
+        assert self.result_obj != None
     
-    def __iter__(self) -> Generator[ResultObject | list[Item], None]:
-        yield self.result_object
+    def __iter__(self) -> Iterator[ResultObject | list[PathItem], None]:
+        yield self.result_obj
         yield sorted(self.items, key=lambda l: l.size)
-    
-    def file_in_files(self, target: str) -> Item | None:
-        for item in self.items:
-            if target == item.name:
-                return item
-
-    # TODO (2)
-    # def __repr__(self):
-    #     return 'DirInfo<%s>' % (self.__str__())
-    
-    @property
-    def result_object(self) -> ResultObject:
-        return ResultObject(is_error=self.is_error, status=self.result_code)
-    
-    @property
-    def is_error(self) -> bool:
-        return self.result_code and '\tError' == self.result_code[:6]
     
     @property
     def files_info(self):
         return '\n'.join(str(item) for item in self.items)
-    
+
     @classmethod
-    def get_files_info(cls, working_directory: Path, dest_directory: Path=".") -> 'DirInfo':
+    def _f_get_path(cls, path: Path) -> Path:
+        return Path(os.path.abspath(os.path.normpath(path)))
+    
+    def _get_files_info(self) -> None:
         """
-        returns A tuple containing the result code: str and a list of items
+        Initializer helper method
         """
-        # print(f"""Result for {'current' if dest_directory == '.' else f"'{dest_directory}'"} directory:""")
+        working_directory = self.working_directory
+        dest_directory = self.dest_directory
 
-        #!
-        #dest_directory = os.path.split(dest_directory)[0]
-        #!
+        abs_working_dir = os.path.abspath(working_directory)
+        target_dir = os.path.normpath(os.path.join(abs_working_dir, dest_directory))
 
-        parts = os.path.split(os.path.join(os.getcwd(), working_directory))
-        prefix, suffix = parts[0], parts[1]
-        if dest_directory == '.' or not dest_directory:
-            dest_directory = suffix
+        if os.path.commonpath([abs_working_dir, target_dir]) != abs_working_dir:
+            self.result_obj=ResultObject(status_code=StatusCode.OUTSIDE,
+                                         raw_msg=dest_directory)
+            return
 
-        def connect_d_to_d(p_dir: str) -> str | None:
+        working_parts = os.path.split(os.path.join(os.getcwd(), working_directory))
+        master_prefix, master_suffix = working_parts
+
+        dest_parts = os.path.split(dest_directory)
+        dest_prefix, dest_suffix = dest_parts
+        
+
+        def connect_d_to_d(p_dir: Path) -> Optional[Path]:
             
-            if dest_directory == p_dir:
-                return os.path.join(prefix, p_dir) 
+            parts = str(p_dir).partition(dest_directory)
+            found_dir = sum(map(lambda x: x is str(), parts)) == 1
+            found_dir |= os.path.normpath(dest_directory) == dest_prefix
+
+            if found_dir:
+                return Path(os.path.join(master_prefix, p_dir))
             
             for _, dirs, _ in os.walk(p_dir):
-                
-                for _dir in dirs:
-                    
-                    
-                    full_path = os.path.join(prefix, p_dir, _dir) 
-                
-                    # found target directory  
-                    if dest_directory == _dir:
-                        return full_path
 
-                    # dfs recursion
+                for _dir in dirs:
+                    full_path = Path(os.path.join(master_prefix, p_dir, _dir))
+
                     res = connect_d_to_d(p_dir=full_path)
                     if res:
                         return res
-        
-        # try to connect working_directory to dest_directory
-        new_directory = connect_d_to_d(p_dir=working_directory)
-        
-        if new_directory is None:
-            j_path = os.path.join(cls.get_path(working_directory), cls.get_path(dest_directory))
-            if len(j_path) > len(working_directory):
-                return DirInfo(result_code=f'\tError: Cannot list "{dest_directory}" as it is outside the permitted working directory')
+
+        if dest_directory == DOT:
+            connected_directory = working_directory
+            self.result_obj = ResultObject(status_code=StatusCode.SUCCESS_DIR_IS,
+                                           raw_msg=DOT)
+        else:
+            # try to connect working_directory to dest_directory
+            connected_directory = connect_d_to_d(p_dir=working_directory)
+
+            if not connected_directory:
+                self.result_obj = ResultObject(status_code=StatusCode.NOT_A_DIR,
+                                               raw_msg=dest_directory)
+                return 
+
+            self.result_obj = ResultObject(status_code=StatusCode.SUCCESS_DIR_WITHIN,
+                                           raw_msg=dest_directory)
+
+        # TODO update
+        # for root, dirs, files in os.walk(new_directory):
+        for file_or_item in os.listdir(connected_directory):
+
+            file_path = os.path.join(connected_directory, Path(file_or_item))
+
+            path_item = PathItem(abs_path=Path(file_path),
+                                 size=os.path.getsize(file_path),
+                                 is_dir=os.path.isdir(file_path))
             
-            return DirInfo(result_code=f'\tError: Cannot list "{dest_directory}" as it is outside the permitted working directory')
+            self.items.append(path_item)
 
+    def file_in_files(self, file_name: str) -> PathItem | None:
+        """
+        This function returns the file in the directory
+        if it manages to find it!
+
+        This function also has a side effect of updating the STATUS CODE 
+        in case it fails or succeeds to find the file.
+        """
+        print(' [*] searching item ======> ', file_name)
+        for item in self.items:
+            
+            if file_name == item.file_name:
+                
+                self.result_obj.update_status(new_status_code=StatusCode.SUCCESS_FILE_FOUND,
+                                              new_msg=file_name)
+                return item
         
-        files_info = DirInfo(result_code=f'\tSuccess: "{dest_directory}" is within the working directory')
+        # In Linux, file names and directory names are not “the same thing” conceptually, 
+        # but they are treated the same at the filesystem level.
+        self.result_obj.update_status(new_status_code=StatusCode.FILE_NOT_FOUND,
+                                      new_msg=file_name)
 
-        for file_or_item in os.listdir(new_directory):
-            file_path = os.path.join(new_directory, file_or_item)
-            files_info.items.append(Item(abs_path=file_path,
-                                         size=os.path.getsize(file_path),
-                                         is_dir=os.path.isdir(file_path)))
 
-        return files_info
+def _get_files_info(working_directory: Path, 
+                    file_path: str) -> tuple[ResultObject, 
+                                             tuple[Optional[PathItem], Optional[str]]]:
+    
+    head, tail = os.path.split(file_path)
+
+    dir_info = DirInfo(working_directory=working_directory, 
+                       dest_directory=head if '.' in tail else file_path)
+
+    (err, status, msg), files_info = dir_info
+
+    return (err, status, msg), files_info
+
+
+def get_files_info(directory: str) -> ResultObject:
+    return partial(_get_files_info, Path(CWD))

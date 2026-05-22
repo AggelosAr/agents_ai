@@ -1,134 +1,271 @@
-from functions.get_files_info import DirInfo, Item
 import unittest
 
+from functions.get_files_info import DirInfo, PathItem, StatusCode
 
-format_string = lambda x: '\n'.join(l.strip() for l in x.split('\n')) 
-
+# # # TODO dest has dot inside e.g. pkg/./k
 
 class TestGetFilesInfo(unittest.TestCase):
 
-    # def setUp(self):
-    #     self.addTypeEqualityFunc(typeobj=Item, function=Item.__eq__)
+    def setUp(self):
+        self.addTypeEqualityFunc(typeobj=PathItem, function=PathItem.__eq__)
 
     def test_success_current_dir(self):
-        (is_err, result_code), _ = DirInfo.get_files_info(working_directory="calculator", dest_directory=".")
+        dir_info = DirInfo(working_directory="calculator", dest_directory=".")
+        (is_err, status_code, msg), _ = dir_info
 
-        self.assertEqual(is_err, False)
-        self.assertEqual(('\tSuccess: "calculator" is within the working directory'), 
-                         (result_code))
-        
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+
+        self.assertEqual(False, is_err)
+        self.assertEqual(StatusCode.SUCCESS_DIR_IS, status_code)
+        self.assertEqual(('\tSuccess: "." is the working directory'), 
+                         (msg))
+    
+    def test_not_a_direcotry(self):
+        dir_info = DirInfo(working_directory="calculator", dest_directory="does_not_exist")
+        (is_err, status_code, msg), _ = dir_info
+
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+
+        self.assertEqual(False, is_err)
+        self.assertEqual(StatusCode.NOT_A_DIR, status_code)
+        self.assertEqual(('\tError: Cannot list "does_not_exist" as it is not a dir'), 
+                         (msg))
+
     def test_error_normal(self):
-        (is_err, result_code), _ = DirInfo.get_files_info(working_directory="calculator", dest_directory="/bin")
+        dir_info = DirInfo(working_directory="calculator", dest_directory="/bin")
+        (is_err, status_code, msg), _ = dir_info
 
-        self.assertEqual(is_err, True)
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+
+        self.assertEqual(True, is_err)
+        self.assertEqual(StatusCode.OUTSIDE, status_code)
         self.assertEqual(('\tError: Cannot list "/bin" as it is outside the permitted working directory'), 
-                         (result_code))
+                         (msg))
 
     def test_error_double_dot(self):
-        (is_err, result_code), _ = DirInfo.get_files_info(working_directory="calculator", dest_directory="../")
-        
-        self.assertEqual(is_err, True)
-        self.assertEqual(('\tError: Cannot list "../" as it is outside the permitted working directory'), 
-                         (result_code))
-    
-    # TODO update
-    # def test_success_nested_file(self):
-    #     result_code, _ = DirInfo.get_files_info(working_directory="calculator", dest_directory="main.py")
+        dir_info = DirInfo(working_directory="calculator", dest_directory="../")
+        (is_err, status_code, msg), _ = dir_info
 
-    #     self.assertEqual(('\tError: "main.py" is not a directory'), 
-    #                      (result_code))
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+
+        self.assertEqual(True, is_err)
+        self.assertEqual(StatusCode.OUTSIDE, status_code)
+        self.assertEqual(('\tError: Cannot list "../" as it is outside the permitted working directory'), 
+                         (msg))
     
-    #///////////////////////////////////////////////////////////
-    #//////////////////////////////////////////////////////////
-    #///// above tests, test the error logic
-    #///// below tests, test the return values and logic !!
-    #////////////////////////////////////////////////////////
-    #///////////////////////////////////////////////////////
+    def test_success_nested_file(self):
+        dir_info = DirInfo(working_directory="calculator", dest_directory="main.py")
+        (is_err, status_code, msg), _ = dir_info
+
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+
+        self.assertEqual(False, is_err)
+        self.assertEqual(StatusCode.NOT_A_DIR, status_code)
+        self.assertEqual(('\tError: Cannot list "main.py" as it is not a dir'), 
+                         (msg))
+                          
+    # ///////////////////////////////////////////////////////////
+    # //////////////////////////////////////////////////////////
+    # ///// above tests, test the error logic
+    # ///// below tests, test the return values and logic !!
+    # ////////////////////////////////////////////////////////
+    # ///////////////////////////////////////////////////////
 
     def test_success_dot_current(self):
-        (_, result_code), result = DirInfo.get_files_info(working_directory="calculator", dest_directory=".")
+        dir_info = DirInfo(working_directory="calculator", dest_directory=".")
+        (_, _, msg), files = dir_info
 
-        self.assertEqual(('\tSuccess: "calculator" is within the working directory'), 
-                         (result_code))
+        print(f'{msg=}')
+        print(f'{files=}')
 
-        self.assertEqual(Item(abs_path="__init__.py", 
-                              size=0, 
-                              is_dir=False), 
-                        result[0])
-        self.assertEqual(Item(abs_path="main.py", 
-                              size=741, 
-                              is_dir=False), 
-                        result[1])
-        self.assertEqual(Item(abs_path="tests.py", 
-                              size=1354, 
-                              is_dir=False), 
-                        result[2])
-        self.assertEqual(Item(abs_path="pkg", 
-                              size=4096, 
-                              is_dir=True), 
-                        result[3])        
+        self.assertEqual(('\tSuccess: "." is the working directory'), 
+                         (msg))
+
+        self.assertEqual(PathItem(abs_path="__init__.py", 
+                                  size=0, 
+                                  is_dir=False), 
+                        files[0])
+        self.assertEqual(PathItem(abs_path="main.py", 
+                                  size=741, 
+                                  is_dir=False), 
+                        files[1])
+        self.assertEqual(PathItem(abs_path="tests.py", 
+                                  size=1354, 
+                                  is_dir=False), 
+                        files[2])
+        self.assertEqual(PathItem(abs_path="pkg", 
+                                  size=4096, 
+                                  is_dir=True), 
+                        files[3])        
     
     def test_success_nest(self):
-        (_, result_code), result = DirInfo.get_files_info(working_directory="calculator", dest_directory="pkg")
+        dir_info = DirInfo(working_directory="calculator", dest_directory="pkg")
+        (is_err, status_code, msg), files = dir_info
 
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+        print(f'{files=}')
+
+        self.assertEqual(False, is_err)
+        self.assertEqual(StatusCode.SUCCESS_DIR_WITHIN, status_code)
         self.assertEqual(('\tSuccess: "pkg" is within the working directory'), 
-                         (result_code))
+                         (msg))
 
-        self.assertEqual(Item(abs_path="__init__.py", 
-                              size=0, 
-                              is_dir=False), 
-                        result[0])
-        self.assertEqual(Item(abs_path="render.py", 
-                              size=403, 
-                              is_dir=False), 
-                        result[1])
-        self.assertEqual(Item(abs_path="calculator.py", 
-                              size=1753, 
-                              is_dir=False), 
-                        result[2])   
-        self.assertEqual(Item(abs_path="__pycache__", 
-                              size=4096, 
-                              is_dir=True), 
-                        result[3])                      
+        self.assertEqual(PathItem(abs_path="__init__.py", 
+                                  size=0, 
+                                  is_dir=False), 
+                        files[0])
+        self.assertEqual(PathItem(abs_path="render.py", 
+                                  size=403, 
+                                  is_dir=False), 
+                        files[1])
+        self.assertEqual(PathItem(abs_path="calculator.py", 
+                                  size=1753, 
+                                  is_dir=False), 
+                        files[2])   
+        self.assertEqual(PathItem(abs_path="__pycache__", 
+                                  size=4096, 
+                                  is_dir=True), 
+                        files[3])             
+
+    def test_success_nest_nest_same_name(self):
+        dir_info = DirInfo(working_directory="calculator", dest_directory="pkg/pkg")
+        (is_err, status_code, msg), _ = dir_info
+
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+
+        self.assertEqual(False, is_err)
+        self.assertEqual(StatusCode.SUCCESS_DIR_WITHIN, status_code)
+        self.assertEqual(('\tSuccess: "pkg/pkg" is within the working directory'), 
+                         (msg))
+
+    # TODO maybe we want to apply formatting to the resulting string?
+    def test_success_nest_nest_same_name(self):
+
+        dir_info = DirInfo(working_directory="calculator", dest_directory="/calculator")
+        (is_err, status_code, msg), _ = dir_info
+
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+
+        self.assertEqual(True, is_err)
+        self.assertEqual(StatusCode.OUTSIDE, status_code)
+
+        # ----------------------------------------------
+
+        dir_info = DirInfo(working_directory="calculator", dest_directory="calculator/")
+        (is_err, status_code, msg), _ = dir_info
+
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+        
+        self.assertEqual(False, is_err)
+        self.assertEqual(StatusCode.SUCCESS_DIR_WITHIN, status_code)
+        self.assertEqual(('\tSuccess: "calculator/" is within the working directory'), 
+                         (msg))
+        
+        # ----------------------------------------------
+
+        dir_info = DirInfo(working_directory="calculator/", dest_directory="calculator")
+        (is_err, status_code, msg), _ = dir_info
+
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+
+        self.assertEqual(False, is_err)
+        self.assertEqual(StatusCode.SUCCESS_DIR_WITHIN, status_code)
+        self.assertEqual(('\tSuccess: "calculator" is within the working directory'), 
+                         (msg))
+        
+        # ----------------------------------------------
+
+        dir_info = DirInfo(working_directory="calculator/", 
+                           dest_directory="calculator/calculator/")
+        (is_err, status_code, msg), _ = dir_info
+
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+
+        self.assertEqual(False, is_err)
+        self.assertEqual(StatusCode.SUCCESS_DIR_WITHIN, status_code)
+        self.assertEqual(('\tSuccess: "calculator/calculator/" is within the working directory'), 
+                         (msg))
+        
+        # ----------------------------------------------
+
+        dir_info = DirInfo(working_directory="calculator/", 
+                           dest_directory="calculator/calculator/calculator/")
+        (is_err, status_code, msg), _ = dir_info
+
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+        
+        self.assertEqual(False, is_err)
+        self.assertEqual(StatusCode.SUCCESS_DIR_WITHIN, status_code)
+        self.assertEqual(('\tSuccess: "calculator/calculator/calculator/" is within the working directory'), 
+                         (msg))
+        
+    # TODO add a test to list files of deeply nested dir
+    def test_success_nest_nest(self):
+        dir_info = DirInfo(working_directory="calculator", dest_directory="pkg/new")
+        (is_err, status_code, msg), files = dir_info
+
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+        print(f'{files=}')
+
+        self.assertEqual(False, is_err)
+        self.assertEqual(StatusCode.SUCCESS_DIR_WITHIN, status_code)
+        self.assertEqual(('\tSuccess: "pkg/new" is within the working directory'), 
+                         (msg))
 
     def test_error_one(self):
-        (_, _), result = DirInfo.get_files_info(working_directory="calculator", dest_directory="/bin")
-        self.assertEqual([], result)
+        dir_info = DirInfo(working_directory="calculator", dest_directory="/bin")
+        (is_err, status_code, _), files = dir_info
+
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{files=}')
+
+        self.assertEqual(True, is_err)
+        self.assertEqual(StatusCode.OUTSIDE, status_code)
+        self.assertEqual([], files)
         
     def test_error_two(self):
-        (_, result_code), result = DirInfo.get_files_info(working_directory="calculator", dest_directory="../")
+        dir_info = DirInfo(working_directory="calculator", dest_directory="../")
+        (is_err, status_code, msg), files = dir_info
 
+        print(f'{is_err=}')
+        print(f'{status_code=}')
+        print(f'{msg=}')
+        print(f'{files=}')
+
+        self.assertEqual(True, is_err)
+        self.assertEqual(StatusCode.OUTSIDE, status_code)
         self.assertEqual(('\tError: Cannot list "../" as it is outside the permitted working directory'), 
-                         (result_code))
-        self.assertEqual([], 
-                         result)
+                         (msg))
+        self.assertEqual([], files)
+
 
 if __name__ == '__main__':
-
-    # print()
-    # print()
-    # result_code, result = DirInfo.get_files_info(working_directory="calculator", dest_directory=".")
-    # print(result)
-    # print(result_code)
-    # print()
-    # print('--------------------------------------')
-
-    # result_code, result = DirInfo.get_files_info(working_directory="calculator", dest_directory="pkg")
-    # print(result)
-    # print(result_code)
-    # print()
-    # print('--------------------------------------')
-
-    # result_code, result = DirInfo.get_files_info(working_directory="calculator", dest_directory="/bin")
-    # print(result)
-    # print(result_code)
-    # print()
-    # print('--------------------------------------')
-
-    # result_code, result = DirInfo.get_files_info(working_directory="calculator", dest_directory="../")
-    # print(result)
-    # print(result_code)
-    # print()
-    # print('--------------------------------------')
 
     unittest.main()
