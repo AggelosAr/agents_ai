@@ -22,6 +22,8 @@ def show_response(*, response: ResponseObject, verbosity: bool) -> None:
             if item.type == 'message':
 
                 print('\n\n\t[*] Response: Function Call:\n\n\t\t\t%s', (item, ))
+                print(item)
+
                 print()
 
 

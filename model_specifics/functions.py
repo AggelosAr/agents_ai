@@ -41,12 +41,12 @@ class FunctionToolCall:
         return '\n -> NAME: %s\n -> ARGS: %s\n -> RESP TYPE: %s' % (self.name, self.args, self.resp_type, )
 
 
-def gather_tool_calls(response_item: RESPONSE, 
+def gather_tool_calls(response: RESPONSE, 
                       verbosity: bool) -> List[FunctionToolCall]:
     
     func_calls = []
 
-    for item in response_item.output:
+    for item in response.output:
 
         if item.type == 'function_call':
 
@@ -66,8 +66,9 @@ def gather_tool_calls(response_item: RESPONSE,
 
             print('\n\n\t[*] AI Response')
             print('\t[*] AI Response is a message')
+            print(response.output[0].content[0].text)
 
-            print(item)
+            print()
 
     return func_calls
 

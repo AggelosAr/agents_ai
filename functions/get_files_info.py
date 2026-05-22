@@ -361,5 +361,5 @@ def _get_files_info(working_directory: Path,
     return (err, status, msg), files_info
 
 
-def get_files_info(directory: str='') -> Callable:
-    return partial(_get_files_info, Path(CWD))(directory)
+# def get_files_info(directory: str='') -> Callable:
+#     return partial(_get_files_info, Path(CWD))(directory)

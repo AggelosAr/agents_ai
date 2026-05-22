@@ -8,8 +8,8 @@ from functions.get_file_contents import _get_file_contents
 from functions.get_files_info import ResultObject, StatusCode
 
 
-def write_file(file_path: str = '', content: str = '') -> Callable:
-    return partial(_write_file, Path(CWD))(file_path, content)
+# def write_file(file_path: str = '', content: str = '') -> Callable:
+#     return partial(_write_file, Path(CWD))(file_path, content)
 
 
 # TODO update when/if list of messages is added

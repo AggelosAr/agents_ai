@@ -8,8 +8,8 @@ from functions.get_files_info import (DirInfo, PathItem, ResultObject,
                                       StatusCode)
 
 
-def get_file_content(file_path: str = '') -> Callable:
-    return partial(_get_file_contents, Path(CWD))(file_path)
+# def get_file_content(file_path: str = '') -> Callable:
+#     return partial(_get_file_contents, Path(CWD))(file_path)
 
 
 def _get_file_contents(working_directory: Path, 

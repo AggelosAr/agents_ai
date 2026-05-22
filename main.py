@@ -1,14 +1,16 @@
 import argparse
-import json
+from functools import partial
+import os
 from typing import Callable, Mapping
 
-from functions.get_file_contents import get_file_content
-from functions.write_file import write_file
-from functions.run_python_file import run_python_file
-from functions.get_files_info import ResultObject, get_files_info
+from functions.get_file_contents import _get_file_contents
+from functions.write_file import _write_file
+from functions.run_python_file import _run_python_file
+from functions.get_files_info import _get_files_info
 
+from model_specifics.consts import AI_CWD
 from model_specifics.functions import gather_tool_calls
-from model_specifics.logs import show_response, show_usage, show_user_message
+from model_specifics.logs import show_usage, show_user_message
 from model_specifics.open_ai.client import _OpenAI
 from model_specifics.open_ai.prompts import \
     SYSTEM_PROMPT as OPEN_AI_SYSTEM_PROMPT
@@ -16,10 +18,10 @@ from model_specifics.open_ai.tools import TOOLS as OPEN_AI_TOOLS
 
 
 FUNCTIONS: Mapping[str, Callable] = {
-    'get_file_content': get_file_content,
-    'write_file': write_file,
-    'run_python_file': run_python_file,
-    'get_files_info': get_files_info
+    'get_file_content': partial(_get_file_contents, os.path.join(os.getcwd(), AI_CWD)),
+    'write_file': partial(_write_file, os.path.join(os.getcwd(), AI_CWD)),
+    'run_python_file': partial(_run_python_file, os.path.join(os.getcwd(), AI_CWD)),
+    'get_files_info': partial(_get_files_info, os.path.join(os.getcwd(), AI_CWD))
 }
 
 
@@ -80,7 +82,7 @@ def main():
 
         # 4. Find function calls and collect them if any
         # 5. Show the tool calls.
-        tool_calls = gather_tool_calls(response_item=response,
+        tool_calls = gather_tool_calls(response=response,
                                        verbosity=verbosity)
 
         if not tool_calls:

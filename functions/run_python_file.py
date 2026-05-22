@@ -1,20 +1,18 @@
-from functools import partial
 import os
 import subprocess
 from pathlib import Path
-from typing import Callable
 
-from functions.consts import CWD, PROC_TIMEOUT
+from functions.consts import PROC_TIMEOUT
 from functions.get_file_contents import _get_file_contents
-from functions.get_files_info import ResultObject, StatusCode
+from functions.get_files_info import StatusCode
 
 # TODO FILL StatusCode.EMPTY and maybe use the result object here as well?
 # https://docs.python.org/3/library/subprocess.html#security-considerations or exc?
 # TODO assert args
 
 
-def run_python_file(file_name: str = '', args: list[str] | None = None) -> Callable:
-    return partial(_run_python_file, Path(CWD))(file_name, args)
+# def run_python_file(file_name: str = '', args: list[str] | None = None) -> Callable:
+#     return partial(_run_python_file, Path(CWD))(file_name, args)
 
 
 def _run_python_file(working_directory: str, 
