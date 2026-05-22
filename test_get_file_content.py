@@ -17,7 +17,7 @@ def main():
     def test_truncation_just():
         set_up()
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
-                                                                file_path='lorem.txt')
+                                                                    file_path='lorem.txt')
         assert err is False
         assert len(contents) < MAX_CHARS + OFFSET, '< %d != %d ' % (len(contents), MAX_CHARS + OFFSET, )
         assert 'truncated' not in contents
@@ -30,7 +30,7 @@ def main():
     def test_truncation_bigger():
         set_up(characters=111789)
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
-                                                                   file_path='lorem.txt')
+                                                                    file_path='lorem.txt')
         assert err is False
         assert len(contents) > MAX_CHARS + OFFSET, '< %d != %d ' % (len(contents), MAX_CHARS + OFFSET, )
         assert 'truncated' in contents
@@ -43,7 +43,7 @@ def main():
     def test_truncation_smaller():
         set_up(characters=8_999)
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
-                                                                   file_path='lorem.txt')
+                                                                    file_path='lorem.txt')
         assert err is False
         assert len(contents) < MAX_CHARS + OFFSET, '< %d != %d ' % (len(contents), MAX_CHARS + OFFSET, )
         assert 'truncated' not in contents
@@ -55,7 +55,7 @@ def main():
     @test_case
     def truncation_small():
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
-                                                                  file_path='main.py')
+                                                                    file_path='main.py')
         assert err is False
         assert len(contents) < 1789 + OFFSET, '< %d != %d ' % (len(contents), 1789 + OFFSET, )
         assert 'truncated' not in contents
@@ -66,7 +66,7 @@ def main():
     @test_case
     def simple_truncation_works_as_expected():
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
-                                                                   file_path='main.py')
+                                                                    file_path='main.py')
         assert err is False
         assert len(contents) < 1789 + OFFSET, '< %d != %d ' % (len(contents), 1789 + OFFSET, )
         assert ('truncated' in contents) is False
@@ -83,7 +83,7 @@ def main():
     @test_case
     def fails_to_get_dir_as_it_does_not_exist():
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
-                                                                   file_path='/bin/cat')
+                                                                    file_path='/bin/cat')
         assert err is True
         assert 'Error: Cannot ' in msg  and 'permitted working' in msg
         assert contents is None
@@ -92,7 +92,7 @@ def main():
     @test_case
     def gets_the_deeply_nested_file_data():
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
-                                                                   file_path='pkg/pkg/sample.txt')
+                                                                    file_path='pkg/pkg/sample.txt')
 
         assert err is False
         assert status == StatusCode.SUCCESS_FILE_FOUND
@@ -102,7 +102,7 @@ def main():
     @test_case
     def gets_the_current_dir_file_data():
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
-                                                                   file_path='main.py')
+                                                                    file_path='main.py')
         assert err is False
         assert status == StatusCode.SUCCESS_FILE_FOUND
         assert  'if len(sys.argv) <= 1:' in contents and 'expression = " ".join(sys.argv[1:])' in contents
@@ -111,7 +111,7 @@ def main():
     @test_case
     def test_fails_to_get_outside_file_data():
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
-                                                                   file_path='/main.py')
+                                                                    file_path='/main.py')
         assert err is True
         assert status == StatusCode.OUTSIDE
 
