@@ -13,8 +13,8 @@ from functions.get_files_info import ResultObject, StatusCode
 # TODO assert args
 
 
-def run_python_file(file_name: str, args: list[str] | None = None) -> Callable:
-    return partial(_run_python_file, working_directory=Path(CWD))
+def run_python_file(file_name: str = '', args: list[str] | None = None) -> Callable:
+    return partial(_run_python_file, Path(CWD))(file_name, args)
 
 
 def _run_python_file(working_directory: str, 

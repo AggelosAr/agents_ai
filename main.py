@@ -1,10 +1,11 @@
 import argparse
+import json
 from typing import Callable, Mapping
 
 from functions.get_file_contents import get_file_content
 from functions.write_file import write_file
 from functions.run_python_file import run_python_file
-from functions.get_files_info import get_files_info
+from functions.get_files_info import ResultObject, get_files_info
 
 from model_specifics.functions import gather_tool_calls
 from model_specifics.logs import show_response, show_usage, show_user_message
@@ -56,8 +57,12 @@ def main():
     ]
 
     response = True
+    MAX_ITERATIONS = 3
+    iterations = 0
 
-    while response:
+    while response and iterations < MAX_ITERATIONS:
+        
+        iterations += 1
 
         # 1. Get response from the last message
         response = client.responses.create(
@@ -74,15 +79,15 @@ def main():
         messages.extend(response.output)
 
         # 4. Find function calls and collect them if any
+        # 5. Show the tool calls.
         tool_calls = gather_tool_calls(response_item=response,
                                        verbosity=verbosity)
 
-        # 5. Show the tool calls.
-        # _ = show_response(response=response, verbosity=verbosity) ?
-        for tool_call in tool_calls:
-            print(tool_call)
+        if not tool_calls:
+            print('\n\n\t[*] AI NO TOOL CALLS BREAK [*]')
+            break
 
-        assert len(tool_calls) == 1
+        # Keep 1 tool call for now 
         tool_call = tool_calls[0]
 
         # 6. Show usage
@@ -91,31 +96,23 @@ def main():
         # 7. Call functions if you found any
         function_to_call = FUNCTIONS.get(tool_call.name)
 
-
-        print('-------------------------> ',function_to_call )
-
-
-        called_function_result = function_to_call(**tool_call.args)
-        
-
-        print()
-        print('----------------------------> ', called_function_result)
-
-
-
-
-        1/0
+        try: 
+            called_function_result = function_to_call(**tool_call.args)
+        except Exception as e:
+            print('Exception: %s' % (str(e), )) 
+            break
 
         # 8. Update the messages with the results of the functions calls
         messages.append(
             {
                 "type": "function_call_output",
                 "call_id": tool_call.call_id,
-                "output": called_function_result,
+                "output": str(called_function_result),
             }
         )
-        print('\n\n\t[*] ADDED')
-        print(messages[-1])
+        print('\n\n\t[*] ADDED FUNCTION CALL RESULT AT MESSAGES')
+        print(str(called_function_result))
+
 
 
         # messages.extend(resp)
@@ -123,7 +120,6 @@ def main():
 
         print('\n\n\t\t-----------------------------------------------------------------')
 
-        input()
 
 
 if __name__=='__main__':

@@ -11,14 +11,16 @@ def show_user_message(*, user_prompt: dict, verbosity: bool) -> None:
 def show_response(*, response: ResponseObject, verbosity: bool) -> None:
     
     if verbosity:
+
         for item in response.output:
             
             if item.type == 'function_call':
                 
                 print('\n\n\t[*] Response: \n\n\t\t\t%s', (item, ))
-                
                 print()
-            else:
+                
+            if item.type == 'message':
+
                 print('\n\n\t[*] Response: Function Call:\n\n\t\t\t%s', (item, ))
                 print()
 

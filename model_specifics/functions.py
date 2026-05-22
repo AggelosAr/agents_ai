@@ -46,22 +46,28 @@ def gather_tool_calls(response_item: RESPONSE,
     
     func_calls = []
 
-    print('\n\n\t[*] AI Response')
-
     for item in response_item.output:
 
         if item.type == 'function_call':
-            
+
+            print('\n\n\t[*] AI Response')
+            print('\t[*] AI Response is a function call')
+
             function_tool_call = FunctionToolCall(name=item.name,
                                                   args=json.loads(item.arguments),
                                                   resp_type=ResponseType.TOOL_FUNCTION_CALL,
                                                   _id=item.id,
                                                   call_id=item.call_id)
            
+            print(function_tool_call)
             func_calls.append(function_tool_call)
 
-        else:
-            print('UNKNOWN TYPE: %s', (item.type, ))
+        if item.type == 'message':
+
+            print('\n\n\t[*] AI Response')
+            print('\t[*] AI Response is a message')
+
+            print(item)
 
     return func_calls
 

@@ -186,7 +186,18 @@ class ResultObject(tuple[bool, StatusCode, str]):
         self.is_error = new_status_code in StatusCode.abort_status_codes()
         self.raw_msg = StatusCode.formatted_msg(status_code=new_status_code, 
                                                 raw_msg=new_msg)
-
+    
+    # @cached_property
+    # def f_msg(self):
+    #     return StatusCode.formatted_msg(status_code=self.status_code, 
+    #                                     raw_msg=self.raw_msg)
+    
+    # def __repr__(self) -> str:
+    #     return ('ResultObject\n\t\t< IS ERROR: %s >\n\t\t<STATUS CODE: %s>\n\t\t< MESSAGE: %s>' 
+    #             % (self.is_error, self.status_code, self.f_msg))
+    
+    # def __str__(self) -> str:
+    #     return self.__repr__()
 
 # TODO is this the correct way to do the iter ?
 class DirInfo(tuple[ResultObject, list[PathItem]]):
@@ -350,5 +361,5 @@ def _get_files_info(working_directory: Path,
     return (err, status, msg), files_info
 
 
-def get_files_info(directory: str) -> Callable:
-    return partial(_get_files_info, working_directory=Path(CWD))
+def get_files_info(directory: str='') -> Callable:
+    return partial(_get_files_info, Path(CWD))(directory)
