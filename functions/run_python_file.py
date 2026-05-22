@@ -1,18 +1,25 @@
+from functools import partial
 import os
 import subprocess
 from pathlib import Path
+from typing import Callable
 
-from functions.consts import PROC_TIMEOUT
-from functions.get_file_content import get_file_contents
-from functions.get_files_info import StatusCode
+from functions.consts import CWD, PROC_TIMEOUT
+from functions.get_file_contents import _get_file_contents
+from functions.get_files_info import ResultObject, StatusCode
 
 # TODO FILL StatusCode.EMPTY and maybe use the result object here as well?
 # https://docs.python.org/3/library/subprocess.html#security-considerations or exc?
 # TODO assert args
 
-def run_python_file(working_directory: str, 
-                    file_path: str, 
-                    args: list[str] | None = None) -> str:
+
+def run_python_file(file_name: str, args: list[str] | None = None) -> Callable[[str], str]:
+    return partial(_run_python_file, Path(CWD))
+
+
+def _run_python_file(working_directory: str, 
+                     file_path: str, 
+                     args: list[str] | None = None) -> str:
     
     try: 
 
@@ -22,8 +29,8 @@ def run_python_file(working_directory: str,
         if '.py' not in file_ext:
             return f'Error: "{file_path}" is not a Python file'
 
-        res = get_file_contents(working_directory=Path(working_directory), 
-                                file_path=file_path)
+        res = _get_file_contents(working_directory=Path(working_directory), 
+                                 file_path=file_path)
         
         (err, status, msg), (file, contents, ) = res
 
@@ -90,3 +97,4 @@ def run_python_file(working_directory: str,
     
     except Exception as e:
         return f'Error: executing Python file: {e}'
+    

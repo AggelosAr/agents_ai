@@ -4,12 +4,11 @@ from model_specifics.responses import ResponseObject
 def show_user_message(*, user_prompt: dict, verbosity: bool) -> None:
 
     if verbosity:
-        print('\n\n\t[*] User prompt: \n\n\t\t\t%s\n\n\t\t\t%s' 
+        print('\n\n\t[*] User prompt\n\n\t\t\t%s\n\n\t\t\t%s'
               % (user_prompt.get('role'), user_prompt.get('content'), ))
-        print()
         
 
-def show_response(*,  response: ResponseObject, verbosity: bool) -> None:
+def show_response(*, response: ResponseObject, verbosity: bool) -> None:
     
     if verbosity:
         for item in response.output:
@@ -20,11 +19,11 @@ def show_response(*,  response: ResponseObject, verbosity: bool) -> None:
                 
                 print()
             else:
-                print('\n\n\t[*] Response: Functin Call:\n\n\t\t\t%s', (item, ))
+                print('\n\n\t[*] Response: Function Call:\n\n\t\t\t%s', (item, ))
                 print()
 
 
-def show_usage(*,  response: ResponseObject, verbosity: bool) -> None:
+def show_usage(*, response: ResponseObject, verbosity: bool) -> None:
 
     if verbosity:
         print()

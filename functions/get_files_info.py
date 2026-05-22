@@ -3,7 +3,7 @@ from collections.abc import Iterator
 from enum import Enum
 from functools import cached_property, partial
 from pathlib import Path
-from typing import Optional, Self
+from typing import Callable, Optional, Self
 
 from functions.consts import CWD, DOT
 
@@ -134,7 +134,7 @@ class PathItem:
         return self._full_file_name_parts[1]
     
     @cached_property
-    def _file_name_parts(self) -> tuple[str, str]:
+    def _file_name_parts(self) -> list[str]:
         assert DOT in self.file_name
         return self.file_name.split(DOT)
     
@@ -350,5 +350,5 @@ def _get_files_info(working_directory: Path,
     return (err, status, msg), files_info
 
 
-def get_files_info(directory: str) -> ResultObject:
+def get_files_info(directory: str) -> Callable[[str], ResultObject]:
     return partial(_get_files_info, Path(CWD))

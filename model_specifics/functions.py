@@ -4,9 +4,9 @@ from typing import Callable, List, Mapping, NamedTuple, TypeAlias, TypeVar
 from model_specifics.responses import ResponseType
 
 RESPONSE = TypeVar('RESPONSE')
-RESPONSE_TEXT = TypeVar('RESPONSE')
+RESPONSE_TEXT = TypeVar('RESPONSE_TEXT')
 
-FUNC_INVOKATION_RESULT: TypeAlias = dict
+FUNC_INVOCATION_RESULT: TypeAlias = dict
 
 
 class Function(NamedTuple):
@@ -19,7 +19,6 @@ class Function(NamedTuple):
 
 # TODO split this to e.g. tool call and create
 class FunctionToolCall:
-    
 
     def __init__(self, 
                  name: str, 
@@ -39,13 +38,15 @@ class FunctionToolCall:
         return self.__repr__()
 
     def __repr__(self) -> str:
-        return 'NAME: %s - ARGS: %s - RESP TYPE: %s' % (self.name, self.args, self.resp_type, )
+        return '\n -> NAME: %s\n -> ARGS: %s\n -> RESP TYPE: %s' % (self.name, self.args, self.resp_type, )
 
 
 def gather_tool_calls(response_item: RESPONSE, 
                       verbosity: bool) -> List[FunctionToolCall]:
     
     func_calls = []
+
+    print('\n\n\t[*] AI Response')
 
     for item in response_item.output:
 
@@ -60,12 +61,12 @@ def gather_tool_calls(response_item: RESPONSE,
             func_calls.append(function_tool_call)
 
         else:
-            print('UNKWOWN TYPE: %s', (item.type, ))
+            print('UNKNOWN TYPE: %s', (item.type, ))
 
     return func_calls
 
 
-def run_functions(funcs: list[Callable], *args, **kwargs) -> FUNC_INVOKATION_RESULT:
+def run_functions(funcs: list[Callable], *args, **kwargs) -> FUNC_INVOCATION_RESULT:
 
     # file_path = json.loads(item.arguments)['file_path']
     # (err, status, msg), files_info = get_files_info(file_path=file_path)

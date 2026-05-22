@@ -1,10 +1,10 @@
 from pathlib import Path
 
-from functions.write_file import write_file
+from functions.write_file import _write_file
 from test_get_file_content import break_down, set_up
 from tests.test_utils import break_down, discover, set_up, test_case
 
-# TODO later upate tests to test the status
+# TODO later update tests to test the status
 
 
 @discover(globals=globals())
@@ -14,7 +14,7 @@ def main():
     @test_case
     def test_successfully_overwrote_file_contents():
         set_up(characters=100)
-        (err, status, msg), contents = write_file(working_directory=Path('calculator'), 
+        (err, status, msg), contents = _write_file(working_directory=Path('calculator'), 
                                                   file_path='lorem.txt', 
                                                   content="wait, this isn't lorem ipsum")
         print(f'{err=}')
@@ -28,7 +28,7 @@ def main():
 
     @test_case
     def test_successfully_wrote_to_file_when_file_did_not_exist(): 
-        (err, status, msg), contents = write_file(working_directory=Path('calculator'), 
+        (err, status, msg), contents = _write_file(working_directory=Path('calculator'), 
                                                   file_path='lorem.txt', 
                                                   content="wait, this isn't lorem ipsum")
         print(f'{err=}')
@@ -42,7 +42,7 @@ def main():
 
     @test_case
     def test_successfully_wrote_to_nested_dir():
-        (err, status, msg), contents = write_file(working_directory=Path('calculator'), 
+        (err, status, msg), contents = _write_file(working_directory=Path('calculator'), 
                                                   file_path='pkg/morelorem.txt', 
                                                   content='lorem ipsum dolor sit quat')
         print(f'{err=}')
@@ -59,7 +59,7 @@ def main():
     @test_case
     def test_successfully_overwrote_to_nested_dir():
         set_up(characters=100, dest='pkg/morelorem.txt')
-        (err, status, msg), contents = write_file(working_directory=Path('calculator'), 
+        (err, status, msg), contents = _write_file(working_directory=Path('calculator'), 
                                                   file_path='pkg/morelorem.txt', 
                                                   content='lorem ipsum dolor sit ')
         print(f'{err=}')
@@ -73,7 +73,7 @@ def main():
 
     @test_case
     def test_illegal_action():
-        (err, status, msg), contents = write_file(working_directory=Path('calculator'), 
+        (err, status, msg), contents = _write_file(working_directory=Path('calculator'), 
                                                   file_path='/tmp/temp.txt', 
                                                   content='this should not be allowed')
         print(f'{err=}')

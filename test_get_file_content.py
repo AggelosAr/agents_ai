@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from functions.consts import MAX_CHARS, OFFSET
-from functions.get_file_content import get_file_contents
+from functions.get_file_contents import _get_file_contents
 from functions.get_files_info import StatusCode
 from tests.test_utils import break_down, discover, set_up, test_case
 
@@ -16,7 +16,7 @@ def main():
     @test_case
     def test_truncation_just():
         set_up()
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                 file_path='lorem.txt')
         assert err is False
         assert len(contents) < MAX_CHARS + OFFSET, '< %d != %d ' % (len(contents), MAX_CHARS + OFFSET, )
@@ -29,7 +29,7 @@ def main():
     @test_case
     def test_truncation_bigger():
         set_up(characters=111789)
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                    file_path='lorem.txt')
         assert err is False
         assert len(contents) > MAX_CHARS + OFFSET, '< %d != %d ' % (len(contents), MAX_CHARS + OFFSET, )
@@ -42,7 +42,7 @@ def main():
     @test_case
     def test_truncation_smaller():
         set_up(characters=8_999)
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                    file_path='lorem.txt')
         assert err is False
         assert len(contents) < MAX_CHARS + OFFSET, '< %d != %d ' % (len(contents), MAX_CHARS + OFFSET, )
@@ -54,7 +54,7 @@ def main():
 
     @test_case
     def truncation_small():
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                   file_path='main.py')
         assert err is False
         assert len(contents) < 1789 + OFFSET, '< %d != %d ' % (len(contents), 1789 + OFFSET, )
@@ -65,7 +65,7 @@ def main():
 
     @test_case
     def simple_truncation_works_as_expected():
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                    file_path='main.py')
         assert err is False
         assert len(contents) < 1789 + OFFSET, '< %d != %d ' % (len(contents), 1789 + OFFSET, )
@@ -82,7 +82,7 @@ def main():
     # ///////////////////////////////////////////////////////
     @test_case
     def fails_to_get_dir_as_it_does_not_exist():
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                    file_path='/bin/cat')
         assert err is True
         assert 'Error: Cannot ' in msg  and 'permitted working' in msg
@@ -91,7 +91,7 @@ def main():
         
     @test_case
     def gets_the_deeply_nested_file_data():
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                    file_path='pkg/pkg/sample.txt')
 
         assert err is False
@@ -101,7 +101,7 @@ def main():
 
     @test_case
     def gets_the_current_dir_file_data():
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                    file_path='main.py')
         assert err is False
         assert status == StatusCode.SUCCESS_FILE_FOUND
@@ -110,7 +110,7 @@ def main():
 
     @test_case
     def test_fails_to_get_outside_file_data():
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                    file_path='/main.py')
         assert err is True
         assert status == StatusCode.OUTSIDE
@@ -118,7 +118,7 @@ def main():
 
     @test_case
     def fails_to_get_file_since_dir_does_not_exist():
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                    file_path='pkg/does_not_exist.py')
         
         print(msg)
@@ -132,7 +132,7 @@ def main():
     @test_case
     def failed():
         # Failed in getting file data in existing nested direstory but not existing file
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                    file_path='calculator/calculator.py')
 
         assert err is True
@@ -143,7 +143,7 @@ def main():
 
     @test_case
     def s_one():
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                    file_path='main.py')
 
         print(f'{err=}')
@@ -159,7 +159,7 @@ def main():
 
     @test_case
     def s_two():
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                    file_path='__init__.py')
 
         print(f'{err=}')
@@ -176,7 +176,7 @@ def main():
 
     @test_case
     def s_two():
-        (err, status, msg), (file, contents, ) = get_file_contents(working_directory=Path('calculator'), 
+        (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                    file_path='calculator/pkg/calculator.py')
 
         print(f'{err=}')

@@ -1,15 +1,20 @@
+from functools import partial
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
-from functions.consts import MAX_CHARS
+from functions.consts import CWD, MAX_CHARS
 from functions.get_files_info import (DirInfo, PathItem, ResultObject,
                                       StatusCode)
 
 
-def get_file_contents(working_directory: Path, 
-                      file_path: str) -> tuple[ResultObject, 
-                                               tuple[Optional[PathItem], Optional[str]]]:
+def get_file_content(directory: str) -> Callable[[str], tuple[ResultObject, str]]:
+    return partial(_get_file_contents, Path(CWD))
+
+
+def _get_file_contents(working_directory: Path, 
+                       file_path: str) -> tuple[ResultObject, 
+                                                tuple[Optional[PathItem], Optional[str]]]:
     try:
 
         head, tail = os.path.split(file_path)
@@ -23,13 +28,12 @@ def get_file_contents(working_directory: Path,
         (err, status, msg), files_info = dir_info
 
         if err:
-            # kinda bad but we will update the the path of the result object 
+            # kinda bad but we will update the path of the result object
             # for visual purposes
             dir_info.result_obj.update_status(new_status_code=dir_info.result_obj.status_code,
                                               new_msg=file_path)
             return dir_info.result_obj, (None, None, )
         
-        # yeah vs code fails? to infer file_in_files as NEVER?
         file_found = dir_info.file_in_files(file_name=tail if '.' in tail else '')
         
         if not file_found:
@@ -48,4 +52,3 @@ def get_file_contents(working_directory: Path,
         result_object = ResultObject(status_code=StatusCode.EXCEPTION,
                                      raw_msg=str(e))
         return result_object, (None, None, )
-       

@@ -1,4 +1,4 @@
-from functions.run_python_file import run_python_file
+from functions.run_python_file import _run_python_file
 from tests.test_utils import discover, test_case
 
 
@@ -9,7 +9,7 @@ def main():
     @test_case
     def test_python_file_runs():
 
-        msg = run_python_file("calculator", "main.py")
+        msg = _run_python_file("calculator", "main.py")
         print(msg)
         assert """STDOUT: Calculator App
 Usage: python main.py "<expression>"
@@ -19,7 +19,7 @@ Example: python main.py "3 + 5""" in msg
     @test_case
     def test_python_file_runs_with_args():
 
-        msg = run_python_file("calculator", "main.py", ["3 + 5"])
+        msg = _run_python_file("calculator", "main.py", ["3 + 5"])
         print(msg)
         assert """STDOUT: {
   "expression": "3 + 5",
@@ -30,7 +30,7 @@ Example: python main.py "3 + 5""" in msg
     @test_case
     def test_python_file_runs_tests_within_tests():
 
-        msg = run_python_file("calculator", "tests.py")
+        msg = _run_python_file("calculator", "tests.py")
         print(msg)
         assert "STDERR: ........." in msg
 
@@ -38,7 +38,7 @@ Example: python main.py "3 + 5""" in msg
     @test_case
     def test_python_file_doesnt_run_since_it_is_outside():
 
-        msg = run_python_file("calculator", "../main.py")
+        msg = _run_python_file("calculator", "../main.py")
         print(msg)
         assert 'Cannot execute "../main.py" as it is outside' == msg
 
@@ -46,7 +46,7 @@ Example: python main.py "3 + 5""" in msg
     @test_case
     def test_python_file_not_found():
 
-        msg = run_python_file("calculator", "nonexistent.py")
+        msg = _run_python_file("calculator", "nonexistent.py")
         print(msg)
         assert '"nonexistent.py" does not exist' == msg
 
@@ -54,7 +54,7 @@ Example: python main.py "3 + 5""" in msg
     @test_case
     def test_file_wont_run_since_it_is_not_a_python_file():
 
-        msg = run_python_file("calculator", "lorem.txt")
+        msg = _run_python_file("calculator", "lorem.txt")
         print(msg)
         assert 'Error' in msg and 'not a Python file' in msg
 

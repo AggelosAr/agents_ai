@@ -45,7 +45,7 @@ def main():
 
     while response:
 
-        # 1. Get repsonse from the last message
+        # 1. Get response from the last message
         response = client.responses.create(
             model=client.my_default_model,
             input=messages,
@@ -53,7 +53,7 @@ def main():
             temperature=0
         )
 
-        # 2. Print the user query and the response in a user friendly manner
+        # 2. Print the user query and the response in a user-friendly manner
         _ = show_user_message(user_prompt=messages[-1], verbosity=verbosity)
 
         # 3. Update messages with the response output
