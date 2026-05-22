@@ -16,5 +16,5 @@ class _OpenAI(OpenAI):
 
     @property
     def my_default_model(self) -> str:
-        return self.model
+        return self._MODEL
     

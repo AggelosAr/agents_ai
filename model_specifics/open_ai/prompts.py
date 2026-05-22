@@ -18,4 +18,9 @@ You can perform the following operations:
 
 All paths you provide should be relative to the working directory. 
 You do not need to specify the working directory.
+
+Before excecuting or writting files
+You should first list files and directories
+Then read the file contents 
+And finally execute or write the file.
 """

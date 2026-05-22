@@ -8,7 +8,7 @@ from functions.write_file import _write_file
 from functions.run_python_file import __run_python_file
 from functions.get_files_info import _get_files_info
 
-from model_specifics.consts import AI_CWD
+from model_specifics.consts import AI_CWD, MAX_ITERATIONS
 from model_specifics.functions import gather_tool_calls
 from model_specifics.logs import show_usage, show_user_message
 from model_specifics.open_ai.client import _OpenAI
@@ -59,8 +59,9 @@ def main():
     ]
 
     response = True
-    MAX_ITERATIONS = 3
     iterations = 0
+
+    # TODO where do we put input for the user?
 
     while response and iterations < MAX_ITERATIONS:
         
@@ -71,7 +72,7 @@ def main():
             model=client.my_default_model,
             input=messages,
             tools=OPEN_AI_TOOLS,
-            temperature=0
+            #temperature=0
         )
 
         # 2. Print the user query and the response in a user-friendly manner
@@ -88,34 +89,33 @@ def main():
         if not tool_calls:
             print('\n\n\t[*] AI NO TOOL CALLS BREAK [*]')
             break
-
-        # Keep 1 tool call for now 
-        tool_call = tool_calls[0]
-
+        
         # 6. Show usage
         _ = show_usage(response=response, verbosity=verbosity)
-        
-        # 7. Call functions if you found any
-        function_to_call = FUNCTIONS.get(tool_call.name)
 
-        try: 
-            called_function_result = function_to_call(**tool_call.args)
-        except Exception as e:
-            print('Exception: %s' % (str(e), )) 
-            break
+        for tool_call in tool_calls:
+            # 7. Call functions if you found any
+            function_to_call = FUNCTIONS.get(tool_call.name)
 
-        # 8. Update the messages with the results of the functions calls
-        messages.append(
-            {
-                "type": "function_call_output",
-                "call_id": tool_call.call_id,
-                "output": str(called_function_result),
-            }
-        )
-        print('\n\n\t[*] ADDED FUNCTION CALL RESULT AT MESSAGES')
-        print(str(called_function_result))
+            try: 
+                called_function_result = function_to_call(**tool_call.args)
+            except Exception as e:
+                print('Exception: %s' % (str(e), )) 
+                break
 
+            # 8. Update the messages with the results of the functions calls
+            messages.append(
+                {
+                    "type": "function_call_output",
+                    "call_id": tool_call.call_id,
+                    "output": str(called_function_result),
+                }
+            )
+            print('\n\n\t[*] ADDED FUNCTION CALL RESULT AT MESSAGES')
+            print(str(called_function_result))
 
+        #?
+        _ = show_usage(response=response, verbosity=verbosity)
         # messages.extend(resp)
         # messages.extend(func_calls)
         print('\n\n\t\t-----------------------------------------------------------------')

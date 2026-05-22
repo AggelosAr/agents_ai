@@ -38,7 +38,8 @@ class FunctionToolCall:
         return self.__repr__()
 
     def __repr__(self) -> str:
-        return '\n -> NAME: %s\n -> ARGS: %s\n -> RESP TYPE: %s' % (self.name, self.args, self.resp_type, )
+        return ('\n -> NAME: %s\n -> ARGS: %s\n -> RESP TYPE: %s\n -> ID: %s\n -> CALL ID: %s' 
+                % (self.name, self.args, self.resp_type, self._id, self.call_id, ))
 
 
 def gather_tool_calls(response: RESPONSE, 
