@@ -1,11 +1,11 @@
 import os
 from collections.abc import Iterator
 from enum import Enum
-from functools import cached_property
+from functools import cached_property, partial
 from pathlib import Path
 from typing import Optional, Self
 
-from functions.consts import DOT
+from functions.consts import CWD, DOT
 
 # TODO **3** consider updating to have list of messages on levels (or res objects) / updating status
 # TODO FIX string literals / anots
@@ -334,3 +334,21 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
         # but they are treated the same at the filesystem level.
         self.result_obj.update_status(new_status_code=StatusCode.FILE_NOT_FOUND,
                                       new_msg=file_name)
+
+
+def _get_files_info(working_directory: Path, 
+                    file_path: str) -> tuple[ResultObject, 
+                                             tuple[Optional[PathItem], Optional[str]]]:
+    
+    head, tail = os.path.split(file_path)
+
+    dir_info = DirInfo(working_directory=working_directory, 
+                       dest_directory=head if '.' in tail else file_path)
+
+    (err, status, msg), files_info = dir_info
+
+    return (err, status, msg), files_info
+
+
+def get_files_info(directory: str) -> ResultObject:
+    return partial(_get_files_info, Path(CWD))
