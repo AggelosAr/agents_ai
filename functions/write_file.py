@@ -1,15 +1,15 @@
 from functools import partial
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 from functions.consts import CWD
 from functions.get_file_contents import _get_file_contents
 from functions.get_files_info import ResultObject, StatusCode
 
 
-def write_file(file_path: str, content: str) -> tuple[ResultObject, Optional[str]]:
-    return partial(_write_file, Path(CWD))
+def write_file(file_path: str, content: str) -> Callable:
+    return partial(_write_file, working_directory=Path(CWD))
 
 
 # TODO update when/if list of messages is added

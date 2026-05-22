@@ -22,7 +22,7 @@ def main():
         assert len(contents) < MAX_CHARS + OFFSET, '< %d != %d ' % (len(contents), MAX_CHARS + OFFSET, )
         assert 'truncated' not in contents
         print(f'lorem.txt length: {len(contents)}')
-        print(f'lorem.txt truncated: {'truncated' in contents}')
+        #print(f'lorem.txt truncated: {'truncated' in contents}')
         break_down()
 
 
@@ -35,7 +35,7 @@ def main():
         assert len(contents) > MAX_CHARS + OFFSET, '< %d != %d ' % (len(contents), MAX_CHARS + OFFSET, )
         assert 'truncated' in contents
         print(f'lorem.txt length: {len(contents)}')
-        print(f'lorem.txt truncated: {'truncated' in contents}')
+        #print(f'lorem.txt truncated: {'truncated' in contents}')
         break_down()
 
 
@@ -48,7 +48,7 @@ def main():
         assert len(contents) < MAX_CHARS + OFFSET, '< %d != %d ' % (len(contents), MAX_CHARS + OFFSET, )
         assert 'truncated' not in contents
         print(f'lorem.txt length: {len(contents)}')
-        print(f'lorem.txt truncated: {'truncated' in contents}')
+        #print(f'lorem.txt truncated: {'truncated' in contents}')
         break_down()
 
 
@@ -60,7 +60,7 @@ def main():
         assert len(contents) < 1789 + OFFSET, '< %d != %d ' % (len(contents), 1789 + OFFSET, )
         assert 'truncated' not in contents
         print(f'main.py length: {len(contents)}')
-        print(f'main.py truncated: {'truncated' in contents}')
+        #print(f'main.py truncated: {'truncated' in contents}')
 
 
     @test_case
@@ -72,7 +72,7 @@ def main():
         assert ('truncated' in contents) is False
         assert 'expression = " ".join(sys.argv[1:])' in contents
         print(f'main.py length: {len(contents)}')
-        print(f'main.py truncated: {'truncated' in contents}')
+        #print(f'main.py truncated: {'truncated' in contents}')
 
     # ///////////////////////////////////////////////////////////
     # //////////////////////////////////////////////////////////

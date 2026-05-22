@@ -1,5 +1,3 @@
-
-
 TOOLS = [
     {
         "type": "function",
@@ -19,7 +17,7 @@ TOOLS = [
     {
         "type": "function",
         "name": "write_file",
-        "description": "Get folder and file informations.",
+        "description": "Write or overwrite the file contents with the new.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -42,16 +40,16 @@ TOOLS = [
         "parameters": {
             "type": "object",
             "properties": {
-                "directory": {
+                "file_name": {
                     "type": "string",
-                    "description": "The directory to search for the files or folders metadata.",
+                    "description": "The path of the file to run.",
                 },
                 "args": {
-                    "type": "list",
+                    "type": "string",
                     "description": "The args to pass to the python excecutable.",
                 },
             },
-            "required": ["file_path"],
+            "required": ["file_name", "args"],
         },
     },
     {

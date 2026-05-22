@@ -337,18 +337,18 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
 
 
 def _get_files_info(working_directory: Path, 
-                    file_path: str) -> tuple[ResultObject, 
+                    directory: str) -> tuple[ResultObject, 
                                              tuple[Optional[PathItem], Optional[str]]]:
     
-    head, tail = os.path.split(file_path)
+    head, tail = os.path.split(directory)
 
     dir_info = DirInfo(working_directory=working_directory, 
-                       dest_directory=head if '.' in tail else file_path)
+                       dest_directory=head if '.' in tail else directory)
 
     (err, status, msg), files_info = dir_info
 
     return (err, status, msg), files_info
 
 
-def get_files_info(directory: str) -> Callable[[str], ResultObject]:
-    return partial(_get_files_info, Path(CWD))
+def get_files_info(directory: str) -> Callable:
+    return partial(_get_files_info, working_directory=Path(CWD))
