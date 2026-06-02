@@ -1,8 +1,5 @@
 import os
 import shutil
-import traceback
-from functools import partial
-from typing import Any, Callable
 
 
 def generate_lorem_ipsum(characters: int=10_000) -> str:
@@ -43,62 +40,3 @@ def break_down(dest: str='calculator/lorem.txt') -> None:
         os.remove(test_path)
 
     print('\n\n\t-> BREAK DOWN FINISH\n\n')
-
-
-
-TOTAL_TESTS = 0
-TEST_FAILS = 0
-# TODO add utility to add test counter
-# TODO also sort tests (e.g. at the bottom the failures)
-# TODO also remove the test calls inside the main
-
-
-def test_case(name,  func: Callable[[Any, ], Any]) -> Callable[[Any, ], Any]:
-
-    NEGATIVE = "\033[7m"
-    RED = "\033[91m"
-    GREEN = "\033[92m"
-    RESET = "\033[0m"
-    BLUE = "\033[94m"
-    CYAN = "\033[96m"
-    
-    # if func.__name__ not in {'s'}:
-    #     return lambda : ...
-    
-    def wrapper(*args, **kwargs) -> Any:
-
-        print('Running test: <%s>.<%s>\n\n' % (os.path.split(name)[-1], func.__name__, ))
-
-        results = None
-
-        try:
-            results = func(*args, **kwargs)
-        except Exception as e:
-            print('\n\n\n\n\t\t*** EXCEPTION DURING TEST <%s> ***' % (func.__name__, ))
-
-            traceback.print_exc()
-
-            print('\n\n\n\n\n\n\t\t\t %s--------- [FAIL] ---------%s' % (RED, RESET, ))
-        else:
-            print('\n\n\n\n\n\n\t\t\t %s--------- [PASS] ---------%s' % (GREEN, RESET, ))
-        finally:
-            print('%s%s%s%s' % (NEGATIVE, CYAN, 120*'=', RESET))
-        
-        return results
-
-    return wrapper
-
-
-
-def discover(globals):
-
-    globals['test_case'] = partial(test_case, globals['__file__'])
-
-    def wrapper(main):
-        
-        def _wrapper(*args, **kwargs):
-            a_main = main
-            return a_main(*args, **kwargs)
-
-        return _wrapper
-    return wrapper

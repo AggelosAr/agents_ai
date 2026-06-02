@@ -1,22 +1,22 @@
+import unittest
 from pathlib import Path
 
+from functions.test_get_file_content.tests.test_get_file_content import (
+    break_down, set_up)
 from functions.write_file import _write_file
-from test_get_file_content import break_down, set_up
-from tests.test_utils import break_down, discover, set_up, test_case
+from tests.test_utils import break_down, set_up
 
 # TODO later update tests to test the status
 
 
-@discover(globals=globals())
-def main():
 
-
-    @test_case
-    def test_successfully_overwrote_file_contents():
+class TestGetFilesInfo(unittest.TestCase):
+    
+    def test_successfully_overwrote_file_contents(self) -> None:
         set_up(characters=100)
         (err, status, msg), contents = _write_file(working_directory=Path('calculator'), 
-                                                   file_path='lorem.txt', 
-                                                   content="wait, this isn't lorem ipsum")
+                                                    file_path='lorem.txt', 
+                                                    content="wait, this isn't lorem ipsum")
         print(f'{err=}')
         print(f'{status=}')
         print(f'{msg=}')
@@ -26,11 +26,11 @@ def main():
         break_down()
 
 
-    @test_case
-    def test_successfully_wrote_to_file_when_file_did_not_exist(): 
+    
+    def test_successfully_wrote_to_file_when_file_did_not_exist(self) -> None: 
         (err, status, msg), contents = _write_file(working_directory=Path('calculator'), 
-                                                   file_path='lorem.txt', 
-                                                   content="wait, this isn't lorem ipsum")
+                                                    file_path='lorem.txt', 
+                                                    content="wait, this isn't lorem ipsum")
         print(f'{err=}')
         print(f'{status=}')
         print(f'{msg=}')
@@ -40,11 +40,11 @@ def main():
         break_down()
 
 
-    @test_case
-    def test_successfully_wrote_to_nested_dir():
+    
+    def test_successfully_wrote_to_nested_dir(self) -> None:
         (err, status, msg), contents = _write_file(working_directory=Path('calculator'), 
-                                                   file_path='pkg/morelorem.txt', 
-                                                   content='lorem ipsum dolor sit quat')
+                                                    file_path='pkg/morelorem.txt', 
+                                                    content='lorem ipsum dolor sit quat')
         print(f'{err=}')
         print(f'{status=}')
         print(f'{msg=}')
@@ -56,12 +56,12 @@ def main():
         break_down(dest='pkg/morelorem.txt')
 
 
-    @test_case
-    def test_successfully_overwrote_to_nested_dir():
+    
+    def test_successfully_overwrote_to_nested_dir(self) -> None:
         set_up(characters=100, dest='pkg/morelorem.txt')
         (err, status, msg), contents = _write_file(working_directory=Path('calculator'), 
-                                                   file_path='pkg/morelorem.txt', 
-                                                   content='lorem ipsum dolor sit ')
+                                                    file_path='pkg/morelorem.txt', 
+                                                    content='lorem ipsum dolor sit ')
         print(f'{err=}')
         print(f'{status=}')
         print(f'{msg=}')
@@ -71,11 +71,11 @@ def main():
         break_down(dest='pkg/morelorem.txt')
 
 
-    @test_case
-    def test_illegal_action():
+    
+    def test_illegal_action(self) -> None:
         (err, status, msg), contents = _write_file(working_directory=Path('calculator'), 
-                                                   file_path='/tmp/temp.txt', 
-                                                   content='this should not be allowed')
+                                                    file_path='/tmp/temp.txt', 
+                                                    content='this should not be allowed')
         print(f'{err=}')
         print(f'{status=}')
         print(f'{msg=}')
@@ -84,12 +84,7 @@ def main():
         assert '\tError: Cannot list "/tmp/temp.txt" as it is outside the permitted working directory' == msg
         assert contents is None
 
-    test_successfully_overwrote_file_contents()
-    test_successfully_wrote_to_file_when_file_did_not_exist()
-    test_successfully_wrote_to_nested_dir()
-    test_successfully_overwrote_to_nested_dir()
-    test_illegal_action()
 
+if __name__ == '__main__':
+    unittest.main()
 
-if __name__=='__main__':
-    main()    

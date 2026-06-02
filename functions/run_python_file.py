@@ -1,6 +1,5 @@
 import os
 import subprocess
-from functools import partial
 from pathlib import Path
 
 from functions.consts import PROC_TIMEOUT

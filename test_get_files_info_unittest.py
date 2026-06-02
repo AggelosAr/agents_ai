@@ -1,3 +1,4 @@
+from pathlib import Path
 import unittest
 
 from functions.get_files_info import DirInfo, PathItem, StatusCode
@@ -6,12 +7,12 @@ from functions.get_files_info import DirInfo, PathItem, StatusCode
 
 class TestGetFilesInfo(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.addTypeEqualityFunc(typeobj=PathItem, 
                                  function=lambda x, y, msg: x == y)
 
-    def test_success_current_dir(self):
-        dir_info = DirInfo(working_directory="calculator", dest_directory=".")
+    def test_success_current_dir(self) -> None:
+        dir_info = DirInfo(working_directory=Path("calculator"), dest_directory=".")
         (is_err, status_code, msg), _ = dir_info
 
         print(f'{is_err=}')
@@ -23,8 +24,8 @@ class TestGetFilesInfo(unittest.TestCase):
         self.assertEqual(('\tSuccess: "." is the working directory'), 
                          (msg))
     
-    def test_not_a_direcotry(self):
-        dir_info = DirInfo(working_directory="calculator", dest_directory="does_not_exist")
+    def test_not_a_direcotry(self) -> None:
+        dir_info = DirInfo(working_directory=Path("calculator"), dest_directory="does_not_exist")
         (is_err, status_code, msg), _ = dir_info
 
         print(f'{is_err=}')
@@ -36,8 +37,8 @@ class TestGetFilesInfo(unittest.TestCase):
         self.assertEqual(('\tError: Cannot list "does_not_exist" as it is not a dir'), 
                          (msg))
 
-    def test_error_normal(self):
-        dir_info = DirInfo(working_directory="calculator", dest_directory="/bin")
+    def test_error_normal(self) -> None:
+        dir_info = DirInfo(working_directory=Path("calculator"), dest_directory="/bin")
         (is_err, status_code, msg), _ = dir_info
 
         print(f'{is_err=}')
@@ -49,8 +50,8 @@ class TestGetFilesInfo(unittest.TestCase):
         self.assertEqual(('\tError: Cannot list "/bin" as it is outside the permitted working directory'), 
                          (msg))
 
-    def test_error_double_dot(self):
-        dir_info = DirInfo(working_directory="calculator", dest_directory="../")
+    def test_error_double_dot(self) -> None:
+        dir_info = DirInfo(working_directory=Path("calculator"), dest_directory="../")
         (is_err, status_code, msg), _ = dir_info
 
         print(f'{is_err=}')
@@ -62,8 +63,8 @@ class TestGetFilesInfo(unittest.TestCase):
         self.assertEqual(('\tError: Cannot list "../" as it is outside the permitted working directory'), 
                          (msg))
     
-    def test_success_nested_file(self):
-        dir_info = DirInfo(working_directory="calculator", dest_directory="main.py")
+    def test_success_nested_file(self) -> None:
+        dir_info = DirInfo(working_directory=Path("calculator"), dest_directory="main.py")
         (is_err, status_code, msg), _ = dir_info
 
         print(f'{is_err=}')
@@ -82,8 +83,8 @@ class TestGetFilesInfo(unittest.TestCase):
     # ////////////////////////////////////////////////////////
     # ///////////////////////////////////////////////////////
 
-    def test_success_dot_current(self):
-        dir_info = DirInfo(working_directory="calculator", dest_directory=".")
+    def test_success_dot_current(self) -> None:
+        dir_info = DirInfo(working_directory=Path("calculator"), dest_directory=".")
         (_, _, msg), files = dir_info
 
         print(f'{msg=}')
@@ -92,25 +93,25 @@ class TestGetFilesInfo(unittest.TestCase):
         self.assertEqual(('\tSuccess: "." is the working directory'), 
                          (msg))
 
-        self.assertEqual(PathItem(abs_path="__init__.py", 
+        self.assertEqual(PathItem(abs_path=Path("__init__.py"), 
                                   size=0, 
                                   is_dir=False), 
                         files[0])
-        self.assertEqual(PathItem(abs_path="main.py", 
+        self.assertEqual(PathItem(abs_path=Path("main.py"), 
                                   size=741, 
                                   is_dir=False), 
                         files[1])
-        self.assertEqual(PathItem(abs_path="tests.py", 
+        self.assertEqual(PathItem(abs_path=Path("tests.py"), 
                                   size=1354, 
                                   is_dir=False), 
                         files[2])
-        self.assertEqual(PathItem(abs_path="pkg", 
+        self.assertEqual(PathItem(abs_path=Path("pkg"), 
                                   size=4096, 
                                   is_dir=True), 
                         files[3])        
     
-    def test_success_nest(self):
-        dir_info = DirInfo(working_directory="calculator", dest_directory="pkg")
+    def test_success_nest(self) -> None:
+        dir_info = DirInfo(working_directory=Path("calculator"), dest_directory="pkg")
         (is_err, status_code, msg), files = dir_info
 
         print(f'{is_err=}')
@@ -123,25 +124,25 @@ class TestGetFilesInfo(unittest.TestCase):
         self.assertEqual(('\tSuccess: "pkg" is within the working directory'), 
                          (msg))
 
-        self.assertEqual(PathItem(abs_path="__init__.py", 
+        self.assertEqual(PathItem(abs_path=Path("__init__.py"), 
                                   size=0, 
                                   is_dir=False), 
                         files[0])
-        self.assertEqual(PathItem(abs_path="render.py", 
+        self.assertEqual(PathItem(abs_path=Path("render.py"), 
                                   size=403, 
                                   is_dir=False), 
                         files[1])
-        self.assertEqual(PathItem(abs_path="calculator.py", 
+        self.assertEqual(PathItem(abs_path=Path("calculator.py"), 
                                   size=1753, 
                                   is_dir=False), 
                         files[2])   
-        self.assertEqual(PathItem(abs_path="__pycache__", 
+        self.assertEqual(PathItem(abs_path=Path("__pycache__"), 
                                   size=4096, 
                                   is_dir=True), 
                         files[3])             
 
-    def test_success_nest_nest_same_name(self):
-        dir_info = DirInfo(working_directory="calculator", dest_directory="pkg/pkg")
+    def test_success_nest_nest_same_name(self) -> None:
+        dir_info = DirInfo(working_directory=Path("calculator"), dest_directory="pkg/pkg")
         (is_err, status_code, msg), _ = dir_info
 
         print(f'{is_err=}')
@@ -154,9 +155,9 @@ class TestGetFilesInfo(unittest.TestCase):
                          (msg))
 
     # TODO maybe we want to apply formatting to the resulting string?
-    def test_success_nest_same_name(self):
+    def test_success_nest_same_name(self) -> None:
 
-        dir_info = DirInfo(working_directory="calculator", dest_directory="/calculator")
+        dir_info = DirInfo(working_directory=Path("calculator"), dest_directory="/calculator")
         (is_err, status_code, msg), _ = dir_info
 
         print(f'{is_err=}')
@@ -168,7 +169,7 @@ class TestGetFilesInfo(unittest.TestCase):
 
         # ----------------------------------------------
 
-        dir_info = DirInfo(working_directory="calculator", dest_directory="calculator/")
+        dir_info = DirInfo(working_directory=Path("calculator"), dest_directory="calculator/")
         (is_err, status_code, msg), _ = dir_info
 
         print(f'{is_err=}')
@@ -182,7 +183,7 @@ class TestGetFilesInfo(unittest.TestCase):
         
         # ----------------------------------------------
 
-        dir_info = DirInfo(working_directory="calculator/", dest_directory="calculator")
+        dir_info = DirInfo(working_directory=Path("calculator/"), dest_directory="calculator")
         (is_err, status_code, msg), _ = dir_info
 
         print(f'{is_err=}')
@@ -196,7 +197,7 @@ class TestGetFilesInfo(unittest.TestCase):
         
         # ----------------------------------------------
 
-        dir_info = DirInfo(working_directory="calculator/", 
+        dir_info = DirInfo(working_directory=Path("calculator/"), 
                            dest_directory="calculator/calculator/")
         (is_err, status_code, msg), _ = dir_info
 
@@ -211,7 +212,7 @@ class TestGetFilesInfo(unittest.TestCase):
         
         # ----------------------------------------------
 
-        dir_info = DirInfo(working_directory="calculator/", 
+        dir_info = DirInfo(working_directory=Path("calculator/"), 
                            dest_directory="calculator/calculator/calculator/")
         (is_err, status_code, msg), _ = dir_info
 
@@ -225,8 +226,8 @@ class TestGetFilesInfo(unittest.TestCase):
                          (msg))
         
     # TODO add a test to list files of deeply nested dir
-    def test_success_nest_nest(self):
-        dir_info = DirInfo(working_directory="calculator", dest_directory="pkg/new")
+    def test_success_nest_nest(self) -> None:
+        dir_info = DirInfo(working_directory=Path("calculator"), dest_directory="pkg/new")
         (is_err, status_code, msg), files = dir_info
 
         print(f'{is_err=}')
@@ -239,8 +240,8 @@ class TestGetFilesInfo(unittest.TestCase):
         self.assertEqual(('\tSuccess: "pkg/new" is within the working directory'), 
                          (msg))
 
-    def test_error_one(self):
-        dir_info = DirInfo(working_directory="calculator", dest_directory="/bin")
+    def test_error_one(self) -> None:
+        dir_info = DirInfo(working_directory=Path("calculator"), dest_directory="/bin")
         (is_err, status_code, _), files = dir_info
 
         print(f'{is_err=}')
@@ -251,8 +252,8 @@ class TestGetFilesInfo(unittest.TestCase):
         self.assertEqual(StatusCode.OUTSIDE, status_code)
         self.assertEqual([], files)
         
-    def test_error_two(self):
-        dir_info = DirInfo(working_directory="calculator", dest_directory="../")
+    def test_error_two(self) -> None:
+        dir_info = DirInfo(working_directory=Path("calculator"), dest_directory="../")
         (is_err, status_code, msg), files = dir_info
 
         print(f'{is_err=}')
