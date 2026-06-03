@@ -177,7 +177,7 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
             obj.result_obj = kwargs['result_obj']
             assert 'items' in kwargs
             obj.items = []
-            return 
+            return obj
         
         return super().__new__(cls)
     
@@ -235,7 +235,7 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
         dest_prefix, dest_suffix = dest_parts
         
 
-        def connect_d_to_d(p_dir: Path) -> Optional[Path]:
+        def connect_d_to_d(p_dir: Path) -> Optional[Path]: # type: ignore[return]
             
             parts = str(p_dir).partition(self.dest_directory)
             found_dir = sum(map(lambda x: x is str(), parts)) == 1
@@ -253,6 +253,8 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
                     if res:
                         return res
         
+        connected_directory = None
+
         if self.dest_directory == DOT:
             connected_directory = self.working_directory
             self.result_obj = ResultObject(status_code=StatusCode.SUCCESS_DIR_IS,
@@ -280,7 +282,7 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
                                  is_dir=os.path.isdir(file_path))
             
             self.items.append(path_item)
-
+    
     def file_in_files(self, file_name: str) -> PathItem | None:
         """
         This function returns the file in the directory
@@ -303,7 +305,8 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
         self.result_obj.update_status(new_status_code=StatusCode.FILE_NOT_FOUND,
                                       new_msg=file_name)
 
-
+        return None
+    
 def _get_files_info(working_directory: Path, 
                     directory: str) -> tuple[ResultObject, list[PathItem]]:
     
