@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from small_test import Test, must_equal
+from small_test import Test
 
 from functions.test_get_file_content.tests.test_get_file_content import (
     break_down, set_up)

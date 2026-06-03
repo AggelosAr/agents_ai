@@ -7,7 +7,6 @@ from functions.get_file_contents import _get_file_contents
 from functions.get_files_info import StatusCode
 from tests.test_utils import break_down, set_up
 
-# TODO assert exceptions is woring as intended
 # TODO test file object 
 
     

@@ -1,12 +1,10 @@
 import os
 from pathlib import Path
-from typing import Optional
 
 from functions.get_file_contents import _get_file_contents
 from functions.get_files_info import ResultObject, StatusCode
 
 
-# TODO update when/if list of messages is added
 def _write_file(working_directory: Path, 
                 file_path: str, 
                 content: str) -> tuple[ResultObject, str]:
@@ -43,7 +41,7 @@ def _write_file(working_directory: Path,
             f.write(content)
 
         # Here we dont update status for now
-        return (err, status, f'Successfully wrote to "{file_path}" ({len(content)} characters written)'), content
+        return (err, status, f'Successfully wrote to "{file_path}" ({len(content)} characters written)'), content # type: ignore[return-value]
 
     except Exception as e:
         result_object = ResultObject(status_code=StatusCode.EXCEPTION,

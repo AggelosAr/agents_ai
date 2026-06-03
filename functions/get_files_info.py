@@ -5,15 +5,8 @@ from functools import cached_property
 from pathlib import Path
 from typing import Optional, Self
 
-from functions.consts import DOT
+from functions.consts import DOT, SECURE_PATH
 
-# TODO FIX ME
-SECURE_PATH = '/home/papaggalos/workspace/python_agent_gemini/python_agent_gemini/'
-
-# TODO **3** consider updating to have list of messages on levels (or res objects) / updating status
-# TODO FIX string literals / anots
-# TODO current implementation propably fails on dotted file names.
-# TODO UPDATE PathItem with relative path as well
 
 class StatusCode(Enum):
 
@@ -25,14 +18,13 @@ class StatusCode(Enum):
 
     FILE_NOT_FOUND = '\tError: File not found or is not a regular file: "%s"'
 
-    # !? security considerations 
     DIR_DOES_NOT_EXIST = '\tError: Failed to find dir "%s" as it does not exist' 
 
     OUTSIDE = '\tError: Cannot list "%s" as it is outside the permitted working directory'
 
-    EXCEPTION = '\tError: Exception: <"%s">' # not tested
+    EXCEPTION = '\tError: Exception: <"%s">'
 
-    EMPTY = '\tEmpty <"%s">' #?
+    EMPTY = '\tEmpty <"%s">'
 
     @classmethod
     def abort_status_codes(cls) -> set['StatusCode']:
@@ -136,9 +128,6 @@ class ResultObject(tuple[bool, StatusCode, str]):
         if not status_code:
             status_code = StatusCode.EMPTY
 
-        if isinstance(raw_msg, Path):
-            1/0
-
         self.is_error = status_code in StatusCode.abort_status_codes()
         self.status_code = status_code
         self.msg = status_code.value % (raw_msg, )
@@ -158,16 +147,12 @@ class ResultObject(tuple[bool, StatusCode, str]):
     def update_status(self, 
                       new_status_code: StatusCode, 
                       new_msg: str | Exception) -> None:
-        
-        if isinstance(new_msg, Path):
-            1/0
 
         self.status_code = new_status_code
         self.is_error = new_status_code in StatusCode.abort_status_codes()
         self.msg = new_status_code.value % (new_msg, )
         
 
-# TODO is this the correct way to do the iter ?
 class DirInfo(tuple[ResultObject, list[PathItem]]):
     """
     In order to initialize this class
@@ -178,7 +163,7 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
     2. To get the file metadata, use the flag search_for_file
        and then use the file_in_files function. 
     """
-    # TODO this seems bad ... workaround for now
+
     def __new__(cls, *args, **kwargs) -> Self:
         obj = super().__new__(cls)
 
@@ -194,9 +179,6 @@ class DirInfo(tuple[ResultObject, list[PathItem]]):
                  working_directory: Path, 
                  dest_directory: str) -> None:
         
-        if isinstance(dest_directory, Path):
-            1/0
-            
         assert DOT not in str(working_directory)
         
         if not dest_directory:
@@ -326,4 +308,4 @@ def _get_files_info(working_directory: Path,
 
     (err, status, msg), files_info = dir_info
 
-    return (err, status, msg), files_info
+    return (err, status, msg), files_info  # type: ignore[return-value]

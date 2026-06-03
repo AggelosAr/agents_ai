@@ -6,7 +6,6 @@ from functions.consts import PROC_TIMEOUT
 from functions.get_file_contents import _get_file_contents
 from functions.get_files_info import StatusCode
 
-# TODO FILL StatusCode.EMPTY and maybe use the result object here as well?
 # https://docs.python.org/3/library/subprocess.html#security-considerations or exc?
 # TODO assert args
 
@@ -49,7 +48,6 @@ def _run_python_file(working_directory: Path,
                 
             return msg
         
-        # workaround
         assert file
 
         # TODO 

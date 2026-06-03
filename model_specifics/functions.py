@@ -40,7 +40,7 @@ class FunctionToolCall:
 def gather_tool_calls(response: ResponseObject, 
                       verbosity: bool) -> list[FunctionToolCall]:
     
-    func_calls = []
+    func_calls = [] # type: ignore[var-annotated]
 
     for item in response.output:
 

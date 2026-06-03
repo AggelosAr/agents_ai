@@ -4,7 +4,7 @@ from small_test import Test, must_equal
 
 from functions.get_files_info import DirInfo, PathItem, StatusCode
 
-# # # TODO dest has dot inside e.g. pkg/./k
+# # # TODO test has dot inside e.g. pkg/./k
 
 
 def path_helper() -> str:
