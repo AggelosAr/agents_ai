@@ -9,7 +9,7 @@ from functions.get_files_info import ResultObject, StatusCode
 # TODO update when/if list of messages is added
 def _write_file(working_directory: Path, 
                 file_path: str, 
-                content: str) -> tuple[ResultObject, Optional[str]]:
+                content: str) -> tuple[ResultObject, str]:
     
     try:
         
@@ -20,7 +20,7 @@ def _write_file(working_directory: Path,
             res_object = ResultObject()
             res_object.update_status(new_status_code=res_object.status_code,
                                      new_msg=f'Error: Cannot write to "{file_path}" as it is a directory')
-            return res_object, None
+            return res_object, ''
 
 
         res_object, (file, contents, ) = _get_file_contents(working_directory=working_directory, 
@@ -29,7 +29,7 @@ def _write_file(working_directory: Path,
         
         if err:
             if status != StatusCode.FILE_NOT_FOUND:
-                return res_object, None
+                return res_object, ''
         
         
         try:
@@ -48,4 +48,4 @@ def _write_file(working_directory: Path,
     except Exception as e:
         result_object = ResultObject(status_code=StatusCode.EXCEPTION,
                                      raw_msg=e)
-        return result_object, None
+        return result_object, ''

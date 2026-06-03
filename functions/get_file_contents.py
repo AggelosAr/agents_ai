@@ -9,7 +9,7 @@ from functions.get_files_info import (DirInfo, PathItem, ResultObject,
 
 def _get_file_contents(working_directory: Path, 
                        file_path: str) -> tuple[ResultObject, 
-                                                tuple[Optional[PathItem], Optional[str]]]:
+                                                tuple[Optional[PathItem], str]]:
     try:
 
         head, tail = os.path.split(file_path)
@@ -26,12 +26,12 @@ def _get_file_contents(working_directory: Path,
             dir_info.result_obj.update_status(new_status_code=status,
                                               new_msg=file_path)
             
-            return dir_info.result_obj, (None, None, )
+            return dir_info.result_obj, (None, '', )
         
         file_found = dir_info.file_in_files(file_name=tail if '.' in tail else '')
         
         if not file_found:
-            return dir_info.result_obj, (None, None, )
+            return dir_info.result_obj, (None, '', )
 
 
         with open(file_found.abs_path, 'r') as f:
@@ -45,4 +45,4 @@ def _get_file_contents(working_directory: Path,
     except Exception as e:
         result_object = ResultObject(status_code=StatusCode.EXCEPTION,
                                      raw_msg=str(e))
-        return result_object, (None, None, )
+        return result_object, (None, '', )

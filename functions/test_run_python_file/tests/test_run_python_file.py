@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from small_test import Test, must_equal
+from small_test import (ExpectedWasDifferentFromActual, Test, WillRaise,
+                        must_equal)
 
 from functions.run_python_file import _run_python_file
 
@@ -45,19 +46,30 @@ def test_python_file_runs_with_args() -> None:
 @Test.case
 def test_python_file_runs_tests_within_tests() -> None:
 
-    msg = _run_python_file(Path("calculator"), "tests.py")
+    msg = _run_python_file(Path("calculator"), "test_calculator.py")
 
     print('-----------------')
     print(msg)
     print('-----------------')
 
-    must_equal(''' | 
+    possibilities = {
+        ''' | 
  | -> STDERR: .........
 ----------------------------------------------------------------------
 Ran 9 tests in 0.000s
 
 OK
-''', msg)
+''',''' | 
+ | -> STDERR: .........
+----------------------------------------------------------------------
+Ran 9 tests in 0.001s
+
+OK
+'''
+
+    }
+
+    must_equal(True, msg in possibilities)
 
 
 

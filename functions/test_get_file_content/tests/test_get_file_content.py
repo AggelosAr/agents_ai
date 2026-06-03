@@ -118,7 +118,7 @@ def fails_to_get_dir_as_it_does_not_exist() -> None:
     print(msg)
     print('---------------------')
 
-    must_equal(None, contents)
+    must_equal('', contents)
 
     
 @Test.case
@@ -177,7 +177,7 @@ def fails_to_get_file_since_dir_does_not_exist() -> None:
 
     must_equal('\tError: File not found or is not a regular file: "does_not_exist.py"', msg)
 
-    must_equal(None, contents)
+    must_equal('', contents)
 
 
 
@@ -193,7 +193,7 @@ def failed() -> None:
     
     assert msg == '\tError: File not found or is not a regular file: "calculator.py"'
 
-    must_equal(None, contents)
+    must_equal('', contents)
 
 
 @Test.case
@@ -234,7 +234,7 @@ def s_two() -> None:
 
 
 @Test.case
-def s_two() -> None:
+def s_two_two() -> None:
     (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                 file_path='calculator/pkg/calculator.py')
 

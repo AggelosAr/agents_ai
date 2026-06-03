@@ -71,11 +71,11 @@ class PathItem:
     
     def __str__(self) -> str:
         if self.is_dir:
-            return 'name %s: file_size=%d, is_dir=%s' % (self.abs_path, self.size, self.dir_repr)
-        return 'name %s: file_size=%d, is_dir=%s' % (self.file_name, self.size, self.dir_repr)
+            return 'name :%s: file_size=%d, is_dir=%s' % (self.abs_path, self.size, self.dir_repr)
+        return 'name :%s: file_size=%d, is_dir=%s' % (self.file_name, self.size, self.dir_repr)
     
-    
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self, other: object) -> bool: # TODO 
+
         if not isinstance(other, PathItem):
             return NotImplemented
         

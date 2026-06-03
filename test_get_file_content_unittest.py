@@ -64,7 +64,7 @@ class TestGetFilesInfo(unittest.TestCase):
 
 
 
-    def truncation_small(self) -> None:
+    def test_truncation_small(self) -> None:
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                     file_path='main.py')
         
@@ -80,7 +80,7 @@ class TestGetFilesInfo(unittest.TestCase):
 
 
 
-    def simple_truncation_works_as_expected(self) -> None:
+    def test_simple_truncation_works_as_expected(self) -> None:
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                     file_path='main.py')
         
@@ -103,7 +103,7 @@ class TestGetFilesInfo(unittest.TestCase):
     # ///////////////////////////////////////////////////////
 
 
-    def fails_to_get_dir_as_it_does_not_exist(self) -> None:
+    def test_fails_to_get_dir_as_it_does_not_exist(self) -> None:
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                     file_path='/bin/cat')
         
@@ -115,11 +115,11 @@ class TestGetFilesInfo(unittest.TestCase):
         print(msg)
         print('---------------------')
 
-        self.assertEqual(None, contents)
+        self.assertEqual('', contents)
 
         
 
-    def gets_the_deeply_nested_file_data(self) -> None:
+    def test_gets_the_deeply_nested_file_data(self) -> None:
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                     file_path='pkg/pkg/sample.txt')
 
@@ -136,7 +136,7 @@ class TestGetFilesInfo(unittest.TestCase):
 
 
 
-    def gets_the_current_dir_file_data(self) -> None:
+    def test_gets_the_current_dir_file_data(self) -> None:
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                     file_path='main.py')
         
@@ -162,7 +162,7 @@ class TestGetFilesInfo(unittest.TestCase):
 
 
 
-    def fails_to_get_file_since_dir_does_not_exist(self) -> None:
+    def test_fails_to_get_file_since_dir_does_not_exist(self) -> None:
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                     file_path='pkg/does_not_exist.py')
         
@@ -174,12 +174,12 @@ class TestGetFilesInfo(unittest.TestCase):
 
         self.assertEqual('\tError: File not found or is not a regular file: "does_not_exist.py"', msg)
 
-        self.assertEqual(None, contents)
+        self.assertEqual('', contents)
 
 
 
 
-    def failed(self) -> None:
+    def test_failed(self) -> None:
         # Failed in getting file data in existing nested direstory but not existing file
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                     file_path='calculator/calculator.py')
@@ -190,11 +190,11 @@ class TestGetFilesInfo(unittest.TestCase):
         
         assert msg == '\tError: File not found or is not a regular file: "calculator.py"'
 
-        self.assertEqual(None, contents)
+        self.assertEqual('', contents)
 
 
 
-    def s_one(self) -> None:
+    def test_s_one(self) -> None:
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                     file_path='main.py')
 
@@ -212,7 +212,7 @@ class TestGetFilesInfo(unittest.TestCase):
 
 
 
-    def s_two(self) -> None:
+    def test_s_two(self) -> None:
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                     file_path='__init__.py')
 
@@ -231,7 +231,7 @@ class TestGetFilesInfo(unittest.TestCase):
 
 
 
-    def s_two(self) -> None:
+    def test_s_two_two(self) -> None:
         (err, status, msg), (file, contents, ) = _get_file_contents(working_directory=Path('calculator'), 
                                                                     file_path='calculator/pkg/calculator.py')
 

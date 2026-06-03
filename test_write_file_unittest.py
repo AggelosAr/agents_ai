@@ -82,7 +82,7 @@ class TestGetFilesInfo(unittest.TestCase):
         print(f'{contents=}')
         assert err is True
         assert '\tError: Cannot list "/tmp/temp.txt" as it is outside the permitted working directory' == msg
-        assert contents is None
+        assert contents == ''
 
 
 if __name__ == '__main__':

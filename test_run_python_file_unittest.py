@@ -43,19 +43,30 @@ Example: python main.py "3 + 5"
 
     def test_python_file_runs_tests_within_tests(self) -> None:
 
-        msg = _run_python_file(Path("calculator"), "tests.py")
+        msg = _run_python_file(Path("calculator"), "test_calculator.py")
 
         print('-----------------')
         print(msg)
         print('-----------------')
 
-        self.assertEqual(''' | 
+
+        possibilities = {
+        ''' | 
  | -> STDERR: .........
 ----------------------------------------------------------------------
 Ran 9 tests in 0.000s
 
 OK
-''', msg)
+''',''' | 
+ | -> STDERR: .........
+----------------------------------------------------------------------
+Ran 9 tests in 0.001s
+
+OK
+'''
+
+    }
+        self.assertEqual(True, msg in possibilities)
 
 
     def test_python_file_doesnt_run_since_it_is_outside(self) -> None:
