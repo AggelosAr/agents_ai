@@ -7,6 +7,9 @@ from typing import Optional, Self
 
 from functions.consts import DOT
 
+# TODO FIX ME
+SECURE_PATH = '/home/papaggalos/workspace/python_agent_gemini/python_agent_gemini/'
+
 # TODO **3** consider updating to have list of messages on levels (or res objects) / updating status
 # TODO FIX string literals / anots
 # TODO current implementation propably fails on dotted file names.
@@ -62,6 +65,7 @@ class PathItem:
                  abs_path: Path,
                  size: int, 
                  is_dir: bool):
+        
         self.abs_path = abs_path
         self.size = size
         self.is_dir = is_dir
@@ -71,8 +75,10 @@ class PathItem:
     
     def __str__(self) -> str:
         if self.is_dir:
-            return 'name :%s: file_size=%d, is_dir=%s' % (self.abs_path, self.size, self.dir_repr)
-        return 'name :%s: file_size=%d, is_dir=%s' % (self.file_name, self.size, self.dir_repr)
+            return ('name :%s: file_size=%d, is_dir=%s' 
+                    % (self.secure_abs_path, self.size, self.dir_repr, ))
+        return ('name :%s: file_size=%d, is_dir=%s' 
+                % (self.secure_abs_path, self.size, self.dir_repr, ))
     
     def __eq__(self, other: object) -> bool: # TODO 
 
@@ -113,7 +119,10 @@ class PathItem:
     def dir_repr(self) -> str:
         return 'True' if self.is_dir is True else 'False'
     
-
+    @property
+    def secure_abs_path(self) -> Path:
+        return Path(str(self.abs_path).replace(SECURE_PATH, ''))
+    
 # TODO maybe ResultObject should inherit from levels and yield lists?
 class ResultObject(tuple[bool, StatusCode, str]):
     
@@ -140,7 +149,7 @@ class ResultObject(tuple[bool, StatusCode, str]):
         yield self.msg
 
     def __repr__(self) -> str:
-        return ('ResultObject\n\t\t< IS ERROR: %s >\n\t\t<STATUS CODE: %s>\n\t\t< MESSAGE: %s>' 
+        return ('ResultObject\n\t\t< IS ERROR: %s >\n\t\t< STATUS CODE: %s >\n\t\t< MESSAGE: %s >' 
                 % (self.is_error, self.status_code, self.msg))
     
     def __str__(self) -> str:
