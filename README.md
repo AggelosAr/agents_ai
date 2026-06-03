@@ -14,7 +14,7 @@ The chatbot can use function calls to:
 * Execute Python scripts
 * Interact with the user through natural language prompts
 
-The model decides when to invoke a function and automatically uses the appropriate tool to complete the user's request.
+The model decides when to invoke a function and automagically uses the appropriate tool to complete the user's request.
 
 ## Usage
 
