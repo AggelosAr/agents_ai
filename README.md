@@ -2,6 +2,8 @@
 
 # Function Calling Chatbot
 
+[![Tests](https://github.com/AggelosAr/agents_ai/actions/workflows/tests.yml/badge.svg)](https://github.com/AggelosAr/agents_ai/actions/workflows/tests.yml)
+
 A lightweight AI-powered chatbot built from scratch in Python that uses function calling to interact with the local system.
 
 ## Features
