@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from small_test import Test, must_equal
+from tini_test import Test, must_equal
 
 from functions.get_files_info import DirInfo, PathItem, StatusCode
 

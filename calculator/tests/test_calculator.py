@@ -1,7 +1,7 @@
 #calculator/tests.py
 # Make unittest to ignore this path ...
 
-from small_test import Test, WillRaise, must_equal
+from tini_test import Test, WillRaise, must_equal
 
 from ..pkg.calculator import Calculator
 

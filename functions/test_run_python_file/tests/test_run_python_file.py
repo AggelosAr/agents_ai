@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from small_test import Test, must_equal
+from tini_test import Test, must_equal
 
 from functions.run_python_file import _run_python_file
 

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from small_test import Test, must_equal
+from tini_test import Test, must_equal
 
 from functions.consts import MAX_CHARS, OFFSET
 from functions.get_file_contents import _get_file_contents
